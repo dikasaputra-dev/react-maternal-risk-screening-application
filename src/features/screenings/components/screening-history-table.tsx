@@ -31,14 +31,16 @@ export function ScreeningHistoryTable({ histories }: ScreeningHistoryProps) {
   return (
     <Table>
       <TableHeader>
-        <TableHead>Pasien</TableHead>
-        <TableHead>Perawat</TableHead>
-        <TableHead>Tanggal</TableHead>
-        <TableHead>Usia Ibu</TableHead>
-        <TableHead>Usia Kehamilan</TableHead>
-        <TableHead>Skor</TableHead>
-        <TableHead>Kategori Risiko</TableHead>
-        <TableHead className="text-right">Aksi</TableHead>
+        <TableRow>
+          <TableHead>Pasien</TableHead>
+          <TableHead>Perawat</TableHead>
+          <TableHead>Tanggal</TableHead>
+          <TableHead>Usia Ibu</TableHead>
+          <TableHead>Usia Kehamilan</TableHead>
+          <TableHead>Skor</TableHead>
+          <TableHead>Kategori Risiko</TableHead>
+          <TableHead className="text-right">Aksi</TableHead>
+        </TableRow>
       </TableHeader>
 
       <TableBody>
