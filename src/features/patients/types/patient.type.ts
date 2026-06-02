@@ -6,6 +6,15 @@ export type Patient = {
   fullName: string;
   age: number;
   phone?: string;
+  address?: string;
   lastScreeningDate: string;
   riskCategory: RiskCategory;
+};
+
+export type PatientFormValues = {
+  nik: string;
+  fullName: string;
+  age: number;
+  phone?: string;
+  address?: string;
 };

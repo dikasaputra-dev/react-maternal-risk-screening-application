@@ -1,14 +1,15 @@
+import { NavLink } from "react-router-dom";
+
 import { dashboardNavigation } from "@/constants/navigation";
 import { cn } from "@/lib/utils";
-import { NavLink } from "react-router-dom";
 
 type SidebarProps = {
   activePath?: string;
 };
 
-export function Sidebar({ activePath = "/dashboard" }: SidebarProps) {
+export function Sidebar({ activePath }: SidebarProps) {
   return (
-    <aside className="hidden min-h-screen w-64 border-r border-slate-200 bg-white px-4 py-6 lg:block">
+    <aside className="hidden min-h-screen w-64 shrink-0 border-r border-slate-200 bg-white px-4 py-6 lg:block">
       <div className="mb-8">
         <h1 className="text-xl font-bold text-blue-600">MaternityCare</h1>
         <p className="text-sm text-slate-500">Clinical Screening System</p>
@@ -35,5 +36,5 @@ export function Sidebar({ activePath = "/dashboard" }: SidebarProps) {
         })}
       </nav>
     </aside>
-  )
+  );
 }
