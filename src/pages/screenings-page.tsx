@@ -1,19 +1,5 @@
-import {
-  Card,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { ScreeningForm } from "@/features/screenings/components/screening-form";
 
 export function ScreeningsPage() {
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Screenings</CardTitle>
-        <CardDescription>
-          Halaman ini nanti berisi form skrining dan riwayat pemeriksaan.
-        </CardDescription>
-      </CardHeader>
-    </Card>
-  );
+  return <ScreeningForm />;
 }
