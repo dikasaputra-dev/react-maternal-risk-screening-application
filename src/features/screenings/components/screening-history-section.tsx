@@ -1,3 +1,5 @@
+import { useMemo, useState } from "react";
+
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -7,10 +9,9 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { ScreeningHistoryTable } from "@/features/screenings/components/screening-history-table";
-import { screeningHistoryMock } from "@/features/screenings/data/screening-history.mock";
 import type { RiskCategory } from "@/features/screenings/types/screening.type";
-import { useMemo, useState } from "react";
+import { screeningHistoryMock } from "@/features/screenings/data/screening-history.mock";
+import { ScreeningHistoryTable } from "@/features/screenings/components/screening-history-table";
 
 type RiskFilter = "all" | RiskCategory;
 
@@ -86,7 +87,7 @@ export function ScreeningHistorySection() {
       <CardContent>
         <div className="mb-4 grid gap-3 xl:grid-cols-[1.5fr_1fr_1fr]">
           <Input
-            placeholder="Cari pasies atau perawat..."
+            placeholder="Cari pasien atau perawat..."
             value={search}
             onChange={(event) => setSearch(event.target.value)}
           />
