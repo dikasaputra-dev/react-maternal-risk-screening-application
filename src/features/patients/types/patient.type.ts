@@ -18,3 +18,7 @@ export type PatientFormValues = {
   phone?: string;
   address?: string;
 };
+
+export type PatientFormErrors = Partial<
+  Record<keyof PatientFormValues, string>
+>;

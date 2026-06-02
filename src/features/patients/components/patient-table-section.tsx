@@ -19,6 +19,7 @@ import type {
   PatientFormValues,
   RiskCategory,
 } from "@/features/patients/types/patient.type";
+import { ConfirmModal } from "@/components/ui/confirm-modal";
 
 type RiskFilter = "all" | RiskCategory;
 
@@ -39,6 +40,7 @@ export function PatientTableSection() {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null);
+  const [patientToDelete, setPatientToDelete] = useState<Patient | null>(null);
 
   const filteredPatients = useMemo(() => {
     return patients.filter((patient) => {
@@ -99,13 +101,21 @@ export function PatientTableSection() {
   };
 
   const handleDeletePatient = (patientId: string) => {
-    const confirmDelete = window.confirm(
-      "Apakah Anda yakin ingin menghapus data pasien ini?",
+    const patient = patients.find((item) => item.id === patientId);
+
+    if (!patient) return;
+
+    setPatientToDelete(patient);
+  };
+
+  const handleConfirmDelete = () => {
+    if (!patientToDelete) return;
+
+    setPatients((prev) =>
+      prev.filter((patient) => patient.id !== patientToDelete.id),
     );
 
-    if (!confirmDelete) return;
-
-    setPatients((prev) => prev.filter((patient) => patient.id !== patientId));
+    setPatientToDelete(null);
   };
 
   return (
@@ -176,6 +186,17 @@ export function PatientTableSection() {
           onCancel={handleCloseModal}
         />
       </Modal>
+
+      <ConfirmModal
+        open={Boolean(patientToDelete)}
+        title="Hapus Data Pasien"
+        description={`Apakah Anda yakin ingin menghapus data pasien ${patientToDelete?.fullName}? Aksi ini tidak bisa dibatalkan.`}
+        confirmText="Hapus"
+        cancelText="Batal"
+        variant="danger"
+        onCancel={() => setPatientToDelete(null)}
+        onConfirm={handleConfirmDelete}
+      />
     </>
   );
 }
