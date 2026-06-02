@@ -1,10 +1,17 @@
+import React, { useMemo, useState } from "react";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+
 import type {
   Patient,
+  PatientFormErrors,
   PatientFormValues,
 } from "@/features/patients/types/patient.type";
-import React, { useState } from "react";
+import {
+  hasPatientFormErrors,
+  validatePatientForm,
+} from "@/features/patients/utils/patient-validation";
 
 type PatientFormProps = {
   initialData?: Patient | null;
@@ -25,6 +32,18 @@ export function PatientForm({
     address: initialData?.address ?? "",
   });
 
+  const [errors, setErrors] = useState<PatientFormErrors>({});
+  const [isTouched, setIsTouched] = useState(false);
+
+  const liveErrors = useMemo(() => {
+    if (!isTouched) return {};
+    return validatePatientForm(form);
+  }, [form, isTouched]);
+
+  const visibleErrors = isTouched ? liveErrors : errors;
+
+  const isInvalid = hasPatientFormErrors(validatePatientForm(form));
+
   const handleChange = (
     field: keyof PatientFormValues,
     value: string | number,
@@ -33,13 +52,25 @@ export function PatientForm({
       ...prev,
       [field]: value,
     }));
+
+    setIsTouched(true);
   };
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
+    const nextErrors = validatePatientForm(form);
+    setErrors(nextErrors);
+    setIsTouched(true);
+
+    if (hasPatientFormErrors(nextErrors)) return;
+
     onSubmit({
       ...form,
+      nik: form.nik.trim(),
+      fullName: form.fullName.trim(),
+      phone: form.phone?.trim(),
+      address: form.address?.trim(),
       age: Number(form.age),
     });
   };
@@ -51,6 +82,7 @@ export function PatientForm({
         label="NIK"
         placeholder="Masukkan NIK"
         value={form.nik}
+        error={visibleErrors.nik}
         onChange={(event) => handleChange("nik", event.target.value)}
       />
 
@@ -59,14 +91,17 @@ export function PatientForm({
         label="Nama Lengkap"
         placeholder="Masukkan nama pasien"
         value={form.fullName}
+        error={visibleErrors.fullName}
         onChange={(event) => handleChange("fullName", event.target.value)}
       />
 
       <Input
         id="age"
         label="Usia"
+        type="number"
         placeholder="Masukkan usia"
         value={form.age}
+        error={visibleErrors.age}
         onChange={(event) => handleChange("age", event.target.value)}
       />
 
@@ -75,6 +110,7 @@ export function PatientForm({
         label="No. HP"
         placeholder="Contoh: 08xxxxxxxxx"
         value={form.phone}
+        error={visibleErrors.phone}
         onChange={(event) => handleChange("phone", event.target.value)}
       />
 
@@ -83,6 +119,7 @@ export function PatientForm({
         label="Alamat"
         placeholder="Masukkan alamat pasien"
         value={form.address}
+        error={visibleErrors.address}
         onChange={(event) => handleChange("address", event.target.value)}
       />
 
@@ -91,7 +128,7 @@ export function PatientForm({
           Batal
         </Button>
 
-        <Button type="submit">
+        <Button type="submit" disabled={isInvalid}>
           {initialData ? "Simpan Perubahan" : "Tambah Pasien"}
         </Button>
       </div>
