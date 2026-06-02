@@ -1,0 +1,34 @@
+import type { ScreeningHistory } from "@/features/screenings/types/screening-history.type";
+
+export const screeningHistoryMock: ScreeningHistory[] = [
+  {
+    id: "1",
+    patientName: "Siti Aminah",
+    nurseName: "Ns. Rini",
+    screeningDate: "2026-05-21",
+    maternalAge: 28,
+    gestationalAgeWeeks: 36,
+    riskScore: 72,
+    riskCategory: "high_risk",
+  },
+  {
+    id: "2",
+    patientName: "Dewi Lestari",
+    nurseName: "Ns. Rini",
+    screeningDate: "2026-05-22",
+    maternalAge: 24,
+    gestationalAgeWeeks: 38,
+    riskScore: 38,
+    riskCategory: "low_risk",
+  },
+  {
+    id: "3",
+    patientName: "Rina Marlina",
+    nurseName: "Ns. Sari",
+    screeningDate: "2026-05-23",
+    maternalAge: 31,
+    gestationalAgeWeeks: 39,
+    riskScore: 12,
+    riskCategory: "no_risk",
+  },
+];
