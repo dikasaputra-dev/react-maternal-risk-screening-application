@@ -1,7 +1,10 @@
 import { DashboardLayout } from "@/layouts/dashboard-layout";
+import { PublicLayout } from "@/layouts/public-layout";
 import { AuditLogsPage } from "@/pages/audit-logs";
 import { DashboardPage } from "@/pages/dashboard-page";
 import { PatientsPage } from "@/pages/patients-page";
+import { QuizPage } from "@/pages/quiz-page";
+import { QuizResultPage } from "@/pages/quiz-result-page";
 import { ScreeningHistoryPage } from "@/pages/screenings-history-page";
 import { ScreeningsPage } from "@/pages/screenings-page";
 import { createBrowserRouter, Navigate } from "react-router-dom";
@@ -10,6 +13,19 @@ export const appRoute = createBrowserRouter([
   {
     path: "/",
     element: <Navigate to="/dashboard" replace />,
+  },
+  {
+    element: <PublicLayout />,
+    children: [
+      {
+        path: "/quiz",
+        element: <QuizPage />,
+      },
+      {
+        path: "quiz/results/:token",
+        element: <QuizResultPage />,
+      },
+    ],
   },
   {
     element: <DashboardLayout />,
