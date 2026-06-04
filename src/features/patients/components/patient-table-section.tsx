@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 
 import { ConfirmModal } from "@/components/ui/confirm-modal";
 import { Button } from "@/components/ui/button";
@@ -27,6 +27,8 @@ import {
   useResetPatientsMock,
   useUpdatePatient,
 } from "@/features/patients/hooks/use-patient-mutations";
+import { Pagination } from "@/components/ui/pagination";
+import { useSearchParams } from "react-router-dom";
 
 type RiskFilter = "all" | RiskCategory;
 
@@ -40,34 +42,108 @@ const riskOptions: {
   { label: "Risiko Tinggi", value: "high_risk" },
 ];
 
+function getValidRisk(value: string | null): RiskFilter {
+  if (value === "no_risk" || value === "low_risk" || value === "high_risk") {
+    return value;
+  }
+
+  return "all";
+}
+
+function getPositiveNumber(value: string | null, fallback: number) {
+  const parsed = Number(value);
+
+  if (Number.isNaN(parsed) || parsed < 1) {
+    return fallback;
+  }
+
+  return parsed;
+}
+
 export function PatientTableSection() {
-  const [search, setSearch] = useState("");
-  const [riskFilter, setRiskFilter] = useState<RiskFilter>("all");
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const search = searchParams.get("search") ?? "";
+  const riskFilter = getValidRisk(searchParams.get("risk"));
+  const page = getPositiveNumber(searchParams.get("page"), 1);
+  const pageSize = getPositiveNumber(searchParams.get("pageSize"), 5);
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null);
   const [patientToDelete, setPatientToDelete] = useState<Patient | null>(null);
 
-  const { data: patients = [], isLoading, isError } = usePatients();
+  const { data, isLoading, isError } = usePatients({
+    search,
+    risk: riskFilter,
+    page,
+    pageSize,
+  });
+
+  const patients = data?.data ?? [];
+  const pagination = data?.pagination ?? {
+    count: 0,
+    currentPage: 1,
+    totalPages: 1,
+    pageSize,
+  };
 
   const createPatientMutation = useCreatePatient();
   const updatePatientMutation = useUpdatePatient();
   const deletePatientMutation = useDeletePatient();
   const resetPatientsMutation = useResetPatientsMock();
 
-  const filteredPatients = useMemo(() => {
-    return patients.filter((patient) => {
-      const keyword = search.toLowerCase();
+  const updateParams = (
+    nextValues: Partial<{
+      search: string;
+      risk: RiskFilter;
+      page: number;
+      pageSize: number;
+    }>,
+  ) => {
+    const nextParams = new URLSearchParams(searchParams);
 
-      const matchSearch =
-        patient.fullName.toLowerCase().includes(keyword) ||
-        patient.nik.toLowerCase().includes(keyword);
+    const nextSearch = nextValues.search ?? search;
+    const nextRisk = nextValues.risk ?? riskFilter;
+    const nextPage = nextValues.page ?? page;
+    const nextPageSize = nextValues.pageSize ?? pageSize;
 
-      const matchRisk =
-        riskFilter === "all" || patient.riskCategory === riskFilter;
+    if (nextSearch) {
+      nextParams.set("search", nextSearch);
+    } else {
+      nextParams.delete("search");
+    }
 
-      return matchSearch && matchRisk;
+    if (nextRisk !== "all") {
+      nextParams.set("risk", nextRisk);
+    } else {
+      nextParams.delete("risk");
+    }
+
+    nextParams.set("page", String(nextPage));
+    nextParams.set("pageSize", String(nextPageSize));
+
+    setSearchParams(nextParams);
+  };
+
+  const handleSearchChange = (value: string) => {
+    updateParams({
+      search: value,
+      page: 1,
     });
-  }, [patients, search, riskFilter]);
+  };
+
+  const handleRiskChange = (risk: RiskFilter) => {
+    updateParams({
+      risk,
+      page: 1,
+    });
+  };
+
+  const handlePageChange = (nextPage: number) => {
+    updateParams({
+      page: nextPage,
+    });
+  };
 
   const handleOpenCreateModal = () => {
     setSelectedPatient(null);
@@ -97,6 +173,10 @@ export function PatientTableSection() {
 
     await createPatientMutation.mutateAsync(values);
     handleCloseModal();
+
+    updateParams({
+      page: 1,
+    });
   };
 
   const handleDeletePatient = (patientId: string) => {
@@ -112,6 +192,13 @@ export function PatientTableSection() {
 
     await deletePatientMutation.mutateAsync(patientToDelete.id);
     setPatientToDelete(null);
+  };
+
+  const handleResetFilter = () => {
+    setSearchParams({
+      page: "1",
+      pageSize: String(pageSize),
+    });
   };
 
   const isSubmitting =
@@ -141,7 +228,11 @@ export function PatientTableSection() {
               </CardDescription>
             </div>
 
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2">
+              <Button variant="outline" onClick={handleResetFilter}>
+                Reset Filter
+              </Button>
+
               <Button
                 variant="outline"
                 onClick={() => resetPatientsMutation.mutate()}
@@ -160,7 +251,7 @@ export function PatientTableSection() {
             <Input
               placeholder="Cari nama atau NIK..."
               value={search}
-              onChange={(event) => setSearch(event.target.value)}
+              onChange={(event) => handleSearchChange(event.target.value)}
               className="lg:max-w-sm"
             />
 
@@ -174,7 +265,7 @@ export function PatientTableSection() {
                     type="button"
                     size="sm"
                     variant={isActive ? "primary" : "outline"}
-                    onClick={() => setRiskFilter(option.value)}
+                    onClick={() => handleRiskChange(option.value)}
                   >
                     {option.label}
                   </Button>
@@ -188,11 +279,21 @@ export function PatientTableSection() {
               Memuat data pasien...
             </div>
           ) : (
-            <PatientTable
-              patients={filteredPatients}
-              onEdit={handleOpenEditModal}
-              onDelete={handleDeletePatient}
-            />
+            <div className="space-y-4">
+              <PatientTable
+                patients={patients}
+                onEdit={handleOpenEditModal}
+                onDelete={handleDeletePatient}
+              />
+
+              <Pagination
+                currentPage={pagination.currentPage}
+                totalPages={pagination.totalPages}
+                pageSize={pagination.pageSize}
+                totalItems={pagination.count}
+                onPageChange={handlePageChange}
+              />
+            </div>
           )}
         </CardContent>
       </Card>

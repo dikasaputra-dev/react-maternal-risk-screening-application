@@ -11,7 +11,7 @@ export function usePatients(params?: PatientListParams) {
     queryKey: patientQueryKeys.list(params),
     queryFn: async () => {
       if (USE_MOCK_DATA) {
-        return getPatientsMock();
+        return getPatientsMock(params);
       }
 
       return getPatients(params);

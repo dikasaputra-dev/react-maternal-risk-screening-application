@@ -2,16 +2,24 @@ import { apiClient } from "@/api/client";
 import type {
   Patient,
   PatientFormValues,
+  RiskCategory,
 } from "@/features/patients/types/patient.type";
+import type { PaginatedResponse } from "@/types/api";
 
 export type PatientListParams = {
   search?: string;
+  risk?: "all" | RiskCategory;
   page?: number;
   pageSize?: number;
 };
 
 export async function getPatients(params?: PatientListParams) {
-  const response = await apiClient.get<Patient[]>("/api/patients/", { params });
+  const response = await apiClient.get<PaginatedResponse<Patient>>(
+    "/api/patients/",
+    {
+      params,
+    },
+  );
 
   return response.data;
 }

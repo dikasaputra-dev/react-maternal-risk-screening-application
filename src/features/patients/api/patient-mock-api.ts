@@ -1,3 +1,6 @@
+import type { PatientListParams } from "@/api/patients.api";
+import type { PaginatedResponse } from "@/types/api";
+
 import { patientsMock } from "@/features/patients/data/patients.mock";
 import type {
   Patient,
@@ -36,10 +39,45 @@ function writePatients(patients: Patient[]) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(patients));
 }
 
-export async function getPatientsMock() {
+export async function getPatientsMock(
+  params?: PatientListParams,
+): Promise<PaginatedResponse<Patient>> {
   await delay();
 
-  return readPatients();
+  const page = params?.page ?? 1;
+  const pageSize = params?.pageSize ?? 5;
+  const search = params?.search?.toLowerCase() ?? "";
+  const risk = params?.risk ?? "all";
+
+  const patients = readPatients();
+
+  const filteredPatients = patients.filter((patient) => {
+    const matchSearch =
+      !search ||
+      patient.fullName.toLowerCase().includes(search) ||
+      patient.nik.toLowerCase().includes(search);
+
+    const matchRisk = risk === "all" || patient.riskCategory === risk;
+
+    return matchSearch && matchRisk;
+  });
+
+  const count = filteredPatients.length;
+  const totalPages = Math.max(1, Math.ceil(count / pageSize));
+  const safePage = Math.min(page, totalPages);
+
+  const start = (safePage - 1) * pageSize;
+  const end = start + pageSize;
+
+  return {
+    data: filteredPatients.slice(start, end),
+    pagination: {
+      count,
+      currentPage: safePage,
+      totalPages,
+      pageSize,
+    },
+  };
 }
 
 export async function createPatientMock(values: PatientFormValues) {
