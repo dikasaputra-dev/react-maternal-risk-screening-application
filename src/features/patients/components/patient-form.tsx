@@ -17,12 +17,14 @@ type PatientFormProps = {
   initialData?: Patient | null;
   onSubmit: (values: PatientFormValues) => void;
   onCancel: () => void;
+  isSubmitting?: boolean;
 };
 
 export function PatientForm({
   initialData,
   onSubmit,
   onCancel,
+  isSubmitting = false,
 }: PatientFormProps) {
   const [form, setForm] = useState<PatientFormValues>({
     nik: initialData?.nik ?? "",
@@ -128,7 +130,11 @@ export function PatientForm({
           Batal
         </Button>
 
-        <Button type="submit" disabled={isInvalid}>
+        <Button
+          type="submit"
+          disabled={isInvalid || isSubmitting}
+          loading={isSubmitting}
+        >
           {initialData ? "Simpan Perubahan" : "Tambah Pasien"}
         </Button>
       </div>

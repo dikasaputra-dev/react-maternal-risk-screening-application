@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 
+import { ConfirmModal } from "@/components/ui/confirm-modal";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -13,13 +14,18 @@ import { Modal } from "@/components/ui/modal";
 
 import { PatientForm } from "@/features/patients/components/patient-form";
 import { PatientTable } from "@/features/patients/components/patient-table";
-import { patientsMock } from "@/features/patients/data/patients.mock";
+import { usePatients } from "@/features/patients/hooks/use-patients";
+
 import type {
   Patient,
   PatientFormValues,
   RiskCategory,
 } from "@/features/patients/types/patient.type";
-import { ConfirmModal } from "@/components/ui/confirm-modal";
+import {
+  useCreatePatient,
+  useDeletePatient,
+  useUpdatePatient,
+} from "@/features/patients/hooks/use-patient-mutations";
 
 type RiskFilter = "all" | RiskCategory;
 
@@ -34,13 +40,17 @@ const riskOptions: {
 ];
 
 export function PatientTableSection() {
-  const [patients, setPatients] = useState<Patient[]>(patientsMock);
   const [search, setSearch] = useState("");
   const [riskFilter, setRiskFilter] = useState<RiskFilter>("all");
-
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null);
   const [patientToDelete, setPatientToDelete] = useState<Patient | null>(null);
+
+  const { data: patients = [], isLoading, isError } = usePatients();
+
+  const createPatientMutation = useCreatePatient();
+  const updatePatientMutation = useUpdatePatient();
+  const deletePatientMutation = useDeletePatient();
 
   const filteredPatients = useMemo(() => {
     return patients.filter((patient) => {
@@ -72,31 +82,18 @@ export function PatientTableSection() {
     setIsModalOpen(false);
   };
 
-  const handleSubmitPatient = (values: PatientFormValues) => {
+  const handleSubmitPatient = async (values: PatientFormValues) => {
     if (selectedPatient) {
-      setPatients((prev) =>
-        prev.map((patient) =>
-          patient.id === selectedPatient.id
-            ? {
-                ...patient,
-                ...values,
-              }
-            : patient,
-        ),
-      );
+      await updatePatientMutation.mutateAsync({
+        id: selectedPatient.id,
+        values,
+      });
 
       handleCloseModal();
       return;
     }
 
-    const newPatient: Patient = {
-      id: crypto.randomUUID(),
-      ...values,
-      lastScreeningDate: "-",
-      riskCategory: "no_risk",
-    };
-
-    setPatients((prev) => [newPatient, ...prev]);
+    await createPatientMutation.mutateAsync(values);
     handleCloseModal();
   };
 
@@ -108,15 +105,27 @@ export function PatientTableSection() {
     setPatientToDelete(patient);
   };
 
-  const handleConfirmDelete = () => {
+  const handleConfirmDelete = async () => {
     if (!patientToDelete) return;
 
-    setPatients((prev) =>
-      prev.filter((patient) => patient.id !== patientToDelete.id),
-    );
-
+    await deletePatientMutation.mutateAsync(patientToDelete.id);
     setPatientToDelete(null);
   };
+
+  const isSubmitting =
+    createPatientMutation.isPending || updatePatientMutation.isPending;
+
+  if (isError) {
+    return (
+      <Card>
+        <CardContent>
+          <div className="rounded-xl bg-red-50 p-4 text-sm text-red-700">
+            Gagal memuat data pasien.
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <>
@@ -162,11 +171,17 @@ export function PatientTableSection() {
             </div>
           </div>
 
-          <PatientTable
-            patients={filteredPatients}
-            onEdit={handleOpenEditModal}
-            onDelete={handleDeletePatient}
-          />
+          {isLoading ? (
+            <div className="rounded-2xl border border-slate-200 p-8 text-center text-sm text-slate-500">
+              Memuat data pasien...
+            </div>
+          ) : (
+            <PatientTable
+              patients={filteredPatients}
+              onEdit={handleOpenEditModal}
+              onDelete={handleDeletePatient}
+            />
+          )}
         </CardContent>
       </Card>
 
@@ -184,13 +199,14 @@ export function PatientTableSection() {
           initialData={selectedPatient}
           onSubmit={handleSubmitPatient}
           onCancel={handleCloseModal}
+          isSubmitting={isSubmitting}
         />
       </Modal>
 
       <ConfirmModal
         open={Boolean(patientToDelete)}
         title="Hapus Data Pasien"
-        description={`Apakah Anda yakin ingin menghapus data pasien ${patientToDelete?.fullName}? Aksi ini tidak bisa dibatalkan.`}
+        description={`Apakah Anda yakin ingin menghapus data pasien ${patientToDelete?.fullName}?`}
         confirmText="Hapus"
         cancelText="Batal"
         variant="danger"

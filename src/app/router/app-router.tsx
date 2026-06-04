@@ -11,7 +11,7 @@ import { ScreeningHistoryPage } from "@/pages/screenings-history-page";
 import { ScreeningsPage } from "@/pages/screenings-page";
 import { createBrowserRouter, Navigate } from "react-router-dom";
 
-export const appRoute = createBrowserRouter([
+export const appRouter = createBrowserRouter([
   {
     path: "/",
     element: <Navigate to="/dashboard" replace />,
