@@ -2,10 +2,16 @@ import type {
   AuthSession,
   LoginFormValues,
 } from "@/features/auth/types/auth.type";
+// import { loginApi } from "@/api/auth.api";
+
+const USE_DUMMY_AUTH = true;
 
 export async function loginService(
   values: LoginFormValues,
 ): Promise<AuthSession> {
+  if (!USE_DUMMY_AUTH) {
+    // return loginApi(values);
+  }
   await new Promise((resolve) => setTimeout(resolve, 600));
 
   if (!values.email || !values.password) {
