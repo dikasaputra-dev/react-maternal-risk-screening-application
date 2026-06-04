@@ -1,7 +1,9 @@
+import { ProtectedRoute } from "@/components/layout/protected-route";
 import { DashboardLayout } from "@/layouts/dashboard-layout";
 import { PublicLayout } from "@/layouts/public-layout";
 import { AuditLogsPage } from "@/pages/audit-logs";
 import { DashboardPage } from "@/pages/dashboard-page";
+import { LoginPage } from "@/pages/login-page";
 import { PatientsPage } from "@/pages/patients-page";
 import { QuizPage } from "@/pages/quiz-page";
 import { QuizResultPage } from "@/pages/quiz-result-page";
@@ -13,6 +15,10 @@ export const appRoute = createBrowserRouter([
   {
     path: "/",
     element: <Navigate to="/dashboard" replace />,
+  },
+  {
+    path: "/login",
+    element: <LoginPage />,
   },
   {
     element: <PublicLayout />,
@@ -28,26 +34,36 @@ export const appRoute = createBrowserRouter([
     ],
   },
   {
-    element: <DashboardLayout />,
+    element: <ProtectedRoute allowedRoles={["nurse", "admin"]} />,
     children: [
       {
-        path: "/dashboard",
-        element: <DashboardPage />,
+        element: <DashboardLayout />,
+        children: [
+          {
+            path: "/dashboard",
+            element: <DashboardPage />,
+          },
+          {
+            path: "/patients",
+            element: <PatientsPage />,
+          },
+          {
+            path: "/screenings",
+            element: <ScreeningsPage />,
+          },
+          {
+            path: "/screenings/history",
+            element: <ScreeningHistoryPage />,
+          },
+        ],
       },
+    ],
+  },
+  {
+    element: <ProtectedRoute allowedRoles={["admin"]} />,
+    children: [
       {
-        path: "/patients",
-        element: <PatientsPage />,
-      },
-      {
-        path: "/screenings",
-        element: <ScreeningsPage />,
-      },
-      {
-        path: "/screenings/history",
-        element: <ScreeningHistoryPage />,
-      },
-      {
-        path: "/admin/audit-logs",
+        path: "/admin/audit-logs/",
         element: <AuditLogsPage />,
       },
     ],

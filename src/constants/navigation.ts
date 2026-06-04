@@ -24,4 +24,8 @@ export const dashboardNavigation: NavigationItem[] = [
     label: "Audit Logs",
     href: "/admin/audit-logs",
   },
+  {
+    label: "Public Quiz",
+    href: "/quiz",
+  },
 ];
