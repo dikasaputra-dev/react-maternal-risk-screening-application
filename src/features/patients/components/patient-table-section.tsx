@@ -29,6 +29,12 @@ import {
 } from "@/features/patients/hooks/use-patient-mutations";
 import { Pagination } from "@/components/ui/pagination";
 import { useSearchParams } from "react-router-dom";
+import { getErrorMessage } from "@/lib/error";
+import { useToast } from "@/components/ui/toast-context";
+import { ErrorState } from "@/components/ui/error-state";
+import { TableSkeleton } from "@/components/ui/table-skeleton";
+import { getAuthSession } from "@/features/auth/utils/auth-storage";
+import { hasPermission } from "@/features/auth/utils/permission";
 
 type RiskFilter = "all" | RiskCategory;
 
@@ -72,6 +78,8 @@ export function PatientTableSection() {
   const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null);
   const [patientToDelete, setPatientToDelete] = useState<Patient | null>(null);
 
+  const { showToast } = useToast();
+
   const { data, isLoading, isError } = usePatients({
     search,
     risk: riskFilter,
@@ -86,6 +94,13 @@ export function PatientTableSection() {
     totalPages: 1,
     pageSize,
   };
+
+  const session = getAuthSession();
+  const user = session?.user ?? null;
+
+  const canCreatePatient = hasPermission(user, "create_patient");
+  const canUpdatePatient = hasPermission(user, "update_patient");
+  const canDeletePatient = hasPermission(user, "delete_patient");
 
   const createPatientMutation = useCreatePatient();
   const updatePatientMutation = useUpdatePatient();
@@ -161,22 +176,43 @@ export function PatientTableSection() {
   };
 
   const handleSubmitPatient = async (values: PatientFormValues) => {
-    if (selectedPatient) {
-      await updatePatientMutation.mutateAsync({
-        id: selectedPatient.id,
-        values,
+    try {
+      if (selectedPatient) {
+        await updatePatientMutation.mutateAsync({
+          id: selectedPatient.id,
+          values,
+        });
+
+        showToast({
+          type: "success",
+          title: "Data pasien diperbarui",
+          description: "Perubahan data pasien berhasil disimpan.",
+        });
+
+        handleCloseModal();
+        return;
+      }
+
+      await createPatientMutation.mutateAsync(values);
+
+      showToast({
+        type: "success",
+        title: "Pasien ditambahkan",
+        description: "Data pasien baru berhasil dibuat.",
       });
 
       handleCloseModal();
-      return;
+
+      updateParams({
+        page: 1,
+      });
+    } catch (error) {
+      showToast({
+        type: "error",
+        title: "Gagal menyimpan data",
+        description: getErrorMessage(error),
+      });
     }
-
-    await createPatientMutation.mutateAsync(values);
-    handleCloseModal();
-
-    updateParams({
-      page: 1,
-    });
   };
 
   const handleDeletePatient = (patientId: string) => {
@@ -190,8 +226,23 @@ export function PatientTableSection() {
   const handleConfirmDelete = async () => {
     if (!patientToDelete) return;
 
-    await deletePatientMutation.mutateAsync(patientToDelete.id);
-    setPatientToDelete(null);
+    try {
+      await deletePatientMutation.mutateAsync(patientToDelete.id);
+
+      showToast({
+        type: "success",
+        title: "Data pasien dihapus",
+        description: `${patientToDelete.fullName} berhasil dihapus.`,
+      });
+
+      setPatientToDelete(null);
+    } catch (error) {
+      showToast({
+        type: "error",
+        title: "Gagal menghapus data",
+        description: getErrorMessage(error),
+      });
+    }
   };
 
   const handleResetFilter = () => {
@@ -208,9 +259,10 @@ export function PatientTableSection() {
     return (
       <Card>
         <CardContent>
-          <div className="rounded-xl bg-red-50 p-4 text-sm text-red-700">
-            Gagal memuat data pasien.
-          </div>
+          <ErrorState
+            title="Gagal memuat data pasien"
+            description="Periksa koneksi atau coba refresh halaman."
+          />
         </CardContent>
       </Card>
     );
@@ -235,13 +287,32 @@ export function PatientTableSection() {
 
               <Button
                 variant="outline"
-                onClick={() => resetPatientsMutation.mutate()}
+                onClick={async () => {
+                  try {
+                    await resetPatientsMutation.mutateAsync();
+
+                    showToast({
+                      type: "success",
+                      title: "Mock data direset",
+                      description:
+                        "Data pasien berhasil dikembalikan ke data awal.",
+                    });
+                  } catch (error) {
+                    showToast({
+                      type: "error",
+                      title: "Gagal reset mock data",
+                      description: getErrorMessage(error),
+                    });
+                  }
+                }}
                 loading={resetPatientsMutation.isPending}
               >
                 Reset Mock
               </Button>
 
-              <Button onClick={handleOpenCreateModal}>Tambah Pasien</Button>
+              {canCreatePatient && (
+                <Button onClick={handleOpenCreateModal}>Tambah Pasien</Button>
+              )}
             </div>
           </div>
         </CardHeader>
@@ -275,15 +346,15 @@ export function PatientTableSection() {
           </div>
 
           {isLoading ? (
-            <div className="rounded-2xl border border-slate-200 p-8 text-center text-sm text-slate-500">
-              Memuat data pasien...
-            </div>
+            <TableSkeleton rows={5} columns={5} />
           ) : (
             <div className="space-y-4">
               <PatientTable
                 patients={patients}
                 onEdit={handleOpenEditModal}
                 onDelete={handleDeletePatient}
+                canEdit={canUpdatePatient}
+                canDelete={canDeletePatient}
               />
 
               <Pagination

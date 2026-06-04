@@ -34,7 +34,12 @@ export const appRouter = createBrowserRouter([
     ],
   },
   {
-    element: <ProtectedRoute allowedRoles={["nurse", "admin"]} />,
+    element: (
+      <ProtectedRoute
+        allowedRoles={["nurse", "admin"]}
+        requiredPermissions={["view_dashboard"]}
+      />
+    ),
     children: [
       {
         element: <DashboardLayout />,
@@ -60,11 +65,21 @@ export const appRouter = createBrowserRouter([
     ],
   },
   {
-    element: <ProtectedRoute allowedRoles={["admin"]} />,
+    element: (
+      <ProtectedRoute
+        allowedRoles={["admin"]}
+        requiredPermissions={["view_audit_logs"]}
+      />
+    ),
     children: [
       {
-        path: "/admin/audit-logs/",
-        element: <AuditLogsPage />,
+        element: <DashboardLayout />,
+        children: [
+          {
+            path: "/admin/audit-logs",
+            element: <AuditLogsPage />,
+          },
+        ],
       },
     ],
   },
