@@ -24,6 +24,7 @@ import type {
 import {
   useCreatePatient,
   useDeletePatient,
+  useResetPatientsMock,
   useUpdatePatient,
 } from "@/features/patients/hooks/use-patient-mutations";
 
@@ -51,6 +52,7 @@ export function PatientTableSection() {
   const createPatientMutation = useCreatePatient();
   const updatePatientMutation = useUpdatePatient();
   const deletePatientMutation = useDeletePatient();
+  const resetPatientsMutation = useResetPatientsMock();
 
   const filteredPatients = useMemo(() => {
     return patients.filter((patient) => {
@@ -139,7 +141,17 @@ export function PatientTableSection() {
               </CardDescription>
             </div>
 
-            <Button onClick={handleOpenCreateModal}>Tambah Pasien</Button>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                onClick={() => resetPatientsMutation.mutate()}
+                loading={resetPatientsMutation.isPending}
+              >
+                Reset Mock
+              </Button>
+
+              <Button onClick={handleOpenCreateModal}>Tambah Pasien</Button>
+            </div>
           </div>
         </CardHeader>
 

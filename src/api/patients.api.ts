@@ -30,4 +30,6 @@ export async function updatePatient(id: string, values: PatientFormValues) {
 
 export async function deletePatient(id: string) {
   await apiClient.delete(`/api/patients/${id}/`);
+
+  return id;
 }

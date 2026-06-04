@@ -1,8 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 
 import { getPatients, type PatientListParams } from "@/api/patients.api";
-import { patientsMock } from "@/features/patients/data/patients.mock";
 import { patientQueryKeys } from "@/features/patients/constants/patient-query-keys";
+import { getPatientsMock } from "@/features/patients/api/patient-mock-api";
 
 const USE_MOCK_DATA = true;
 
@@ -11,8 +11,7 @@ export function usePatients(params?: PatientListParams) {
     queryKey: patientQueryKeys.list(params),
     queryFn: async () => {
       if (USE_MOCK_DATA) {
-        await new Promise((resolve) => setTimeout(resolve, 400));
-        return patientsMock;
+        return getPatientsMock();
       }
 
       return getPatients(params);

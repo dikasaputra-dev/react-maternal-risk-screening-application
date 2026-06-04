@@ -1,11 +1,18 @@
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+
 import {
   createPatient,
   deletePatient,
   updatePatient,
 } from "@/api/patients.api";
-import { patientQueryKeys } from "@/features/patients/constants/patient-query-keys";
 import type { PatientFormValues } from "@/features/patients/types/patient.type";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { patientQueryKeys } from "@/features/patients/constants/patient-query-keys";
+import {
+  createPatientMock,
+  deletePatientMock,
+  resetPatientsMock,
+  updatePatientMock,
+} from "@/features/patients/api/patient-mock-api";
 
 const USE_MOCK_DATA = true;
 
@@ -13,19 +20,14 @@ export function useCreatePatient() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (values: PatientFormValues) => {
+    mutationFn: (values: PatientFormValues) => {
       if (USE_MOCK_DATA) {
-        await new Promise((resolve) => setTimeout(resolve, 400));
-        return {
-          id: crypto.randomUUID(),
-          ...values,
-          lastScreeningDate: "-",
-          riskCategory: "no_risk" as const,
-        };
+        return createPatientMock(values);
       }
 
       return createPatient(values);
     },
+
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: patientQueryKeys.lists(),
@@ -33,26 +35,14 @@ export function useCreatePatient() {
     },
   });
 }
+
 export function useUpdatePatient() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({
-      id,
-      values,
-    }: {
-      id: string;
-      values: PatientFormValues;
-    }) => {
+    mutationFn: ({ id, values }: { id: string; values: PatientFormValues }) => {
       if (USE_MOCK_DATA) {
-        await new Promise((resolve) => setTimeout(resolve, 400));
-
-        return {
-          id,
-          ...values,
-          lastScreeningDate: "-",
-          riskCategory: "no_risk" as const,
-        };
+        return updatePatientMock(id, values);
       }
 
       return updatePatient(id, values);
@@ -70,15 +60,27 @@ export function useDeletePatient() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (id: string) => {
+    mutationFn: (id: string) => {
       if (USE_MOCK_DATA) {
-        await new Promise((resolve) => setTimeout(resolve, 400));
-        return id;
+        return deletePatientMock(id);
       }
 
-      await deletePatient(id);
-      return id;
+      return deletePatient(id);
     },
+
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: patientQueryKeys.lists(),
+      });
+    },
+  });
+}
+
+export function useResetPatientsMock() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: resetPatientsMock,
 
     onSuccess: () => {
       queryClient.invalidateQueries({
