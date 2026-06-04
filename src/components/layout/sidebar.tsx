@@ -1,6 +1,8 @@
 import { NavLink } from "react-router-dom";
 
 import { dashboardNavigation } from "@/constants/navigation";
+import { getAuthSession } from "@/features/auth/utils/auth-storage";
+import { hasPermission, hasRole } from "@/features/auth/utils/permission";
 import { cn } from "@/lib/utils";
 
 type SidebarProps = {
@@ -8,6 +10,24 @@ type SidebarProps = {
 };
 
 export function Sidebar({ activePath }: SidebarProps) {
+  const session = getAuthSession();
+  const user = session?.user ?? null;
+
+  const navigationItems = dashboardNavigation.filter((item) => {
+    if (item.allowedRoles && !hasRole(user, item.allowedRoles)) {
+      return false;
+    }
+
+    if (
+      item.requiredPermission &&
+      !hasPermission(user, item.requiredPermission)
+    ) {
+      return false;
+    }
+
+    return true;
+  });
+
   return (
     <aside className="hidden min-h-screen w-64 shrink-0 border-r border-slate-200 bg-white px-4 py-6 lg:block">
       <div className="mb-8">
@@ -16,7 +36,7 @@ export function Sidebar({ activePath }: SidebarProps) {
       </div>
 
       <nav className="space-y-1">
-        {dashboardNavigation.map((item) => {
+        {navigationItems.map((item) => {
           const isActive = activePath === item.href;
 
           return (

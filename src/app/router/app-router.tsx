@@ -11,7 +11,7 @@ import { ScreeningHistoryPage } from "@/pages/screenings-history-page";
 import { ScreeningsPage } from "@/pages/screenings-page";
 import { createBrowserRouter, Navigate } from "react-router-dom";
 
-export const appRoute = createBrowserRouter([
+export const appRouter = createBrowserRouter([
   {
     path: "/",
     element: <Navigate to="/dashboard" replace />,
@@ -34,7 +34,12 @@ export const appRoute = createBrowserRouter([
     ],
   },
   {
-    element: <ProtectedRoute allowedRoles={["nurse", "admin"]} />,
+    element: (
+      <ProtectedRoute
+        allowedRoles={["nurse", "admin"]}
+        requiredPermissions={["view_dashboard"]}
+      />
+    ),
     children: [
       {
         element: <DashboardLayout />,
@@ -60,11 +65,21 @@ export const appRoute = createBrowserRouter([
     ],
   },
   {
-    element: <ProtectedRoute allowedRoles={["admin"]} />,
+    element: (
+      <ProtectedRoute
+        allowedRoles={["admin"]}
+        requiredPermissions={["view_audit_logs"]}
+      />
+    ),
     children: [
       {
-        path: "/admin/audit-logs/",
-        element: <AuditLogsPage />,
+        element: <DashboardLayout />,
+        children: [
+          {
+            path: "/admin/audit-logs",
+            element: <AuditLogsPage />,
+          },
+        ],
       },
     ],
   },

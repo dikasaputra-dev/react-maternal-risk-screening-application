@@ -7,6 +7,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { EmptyState } from "@/components/ui/empty-state";
 
 import { RiskBadge } from "@/features/patients/components/risk-badge";
 import type { Patient } from "@/features/patients/types/patient.type";
@@ -15,23 +16,23 @@ type PatientTableProps = {
   patients: Patient[];
   onEdit: (patient: Patient) => void;
   onDelete: (patientId: string) => void;
+  canEdit?: boolean;
+  canDelete?: boolean;
 };
 
 export function PatientTable({
   patients,
   onEdit,
   onDelete,
+  canEdit = true,
+  canDelete = true,
 }: PatientTableProps) {
   if (patients.length === 0) {
     return (
-      <div className="rounded-2xl border border-dashed border-slate-300 p-8 text-center">
-        <h3 className="text-sm font-semibold text-slate-900">
-          Data pasien tidak ditemukan
-        </h3>
-        <p className="mt-1 text-sm text-slate-500">
-          Coba ubah kata kunci pencarian atau filter risiko.
-        </p>
-      </div>
+      <EmptyState
+        title="Data pasien tidak ditemukan"
+        description="Coba ubah kata kunci pencarian atau filter risiko."
+      />
     );
   }
 
@@ -65,18 +66,28 @@ export function PatientTable({
               <RiskBadge risk={patient.riskCategory} />
             </TableCell>
 
-            <TableCell className="flex justify-end gap-2">
-              <Button variant="ghost" size="sm" onClick={() => onEdit(patient)}>
-                Edit
-              </Button>
+            <TableCell>
+              <div className="flex justify-end gap-2">
+                {canEdit && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => onEdit(patient)}
+                  >
+                    Edit
+                  </Button>
+                )}
 
-              <Button
-                variant="danger"
-                size="sm"
-                onClick={() => onDelete(patient.id)}
-              >
-                Delete
-              </Button>
+                {canDelete && (
+                  <Button
+                    variant="danger"
+                    size="sm"
+                    onClick={() => onDelete(patient.id)}
+                  >
+                    Delete
+                  </Button>
+                )}
+              </div>
             </TableCell>
           </TableRow>
         ))}
