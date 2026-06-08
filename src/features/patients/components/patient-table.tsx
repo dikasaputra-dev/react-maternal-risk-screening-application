@@ -11,6 +11,7 @@ import { EmptyState } from "@/components/ui/empty-state";
 
 import { RiskBadge } from "@/features/patients/components/risk-badge";
 import type { Patient } from "@/features/patients/types/patient.type";
+import { Link } from "react-router-dom";
 
 type PatientTableProps = {
   patients: Patient[];
@@ -68,6 +69,12 @@ export function PatientTable({
 
             <TableCell>
               <div className="flex justify-end gap-2">
+                <Link to={`/patients/${patient.id}`}>
+                  <Button variant="outline" size="sm">
+                    Detail
+                  </Button>
+                </Link>
+
                 {canEdit && (
                   <Button
                     variant="ghost"

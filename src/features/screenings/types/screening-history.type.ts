@@ -2,6 +2,7 @@ import type { RiskCategory } from "@/features/screenings/types/screening.type";
 
 export type ScreeningHistory = {
   id: string;
+  patientId: string;
   patientName: string;
   nurseName: string;
   screeningDate: string;

@@ -29,15 +29,28 @@ const pageMeta: Record<
     title: "Audit Logs",
     subtitle: "Jejak audit perubahan data medis",
   },
+};
+
+function getPageMeta(pathname: string) {
+  if (pathname.startsWith("/patients/")) {
+    return {
+      title: "Patient Detail",
+      subtitle: "Detail pasien dan riwayat skrining.",
+    };
+  }
+
+  return (
+    pageMeta[pathname] ?? {
+      title: "Dashboard",
+      subtitle: "Clinical Screening System",
+    }
+  );
 }
 
 export function DashboardLayout() {
   const location = useLocation();
 
-  const meta = pageMeta[location.pathname] ?? {
-    title: "Dashboard",
-    subtitle: "Clinical Screening System",
-  };
+  const meta = getPageMeta(location.pathname);
 
   return (
     <div className="flex min-h-screen w-full bg-slate-100">
@@ -51,5 +64,5 @@ export function DashboardLayout() {
         </div>
       </main>
     </div>
-  )
+  );
 }

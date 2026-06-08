@@ -9,4 +9,9 @@ export const patientQueryKeys = {
     [...patientQueryKeys.lists(), params] as const,
 
   detail: (id: string) => [...patientQueryKeys.all, "detail", id] as const,
+
+  screenings: (id: string) =>
+    [...patientQueryKeys.all, "screenings", id] as const,
 };
+
+

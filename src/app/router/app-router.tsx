@@ -4,6 +4,7 @@ import { PublicLayout } from "@/layouts/public-layout";
 import { AuditLogsPage } from "@/pages/audit-logs";
 import { DashboardPage } from "@/pages/dashboard-page";
 import { LoginPage } from "@/pages/login-page";
+import { PatientDetailPage } from "@/pages/patient-detail-page";
 import { PatientsPage } from "@/pages/patients-page";
 import { QuizPage } from "@/pages/quiz-page";
 import { QuizResultPage } from "@/pages/quiz-result-page";
@@ -51,6 +52,10 @@ export const appRouter = createBrowserRouter([
           {
             path: "/patients",
             element: <PatientsPage />,
+          },
+          {
+            path: "/patients/:patientId",
+            element: <PatientDetailPage />,
           },
           {
             path: "/screenings",

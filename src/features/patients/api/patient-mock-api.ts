@@ -6,6 +6,7 @@ import type {
   Patient,
   PatientFormValues,
 } from "@/features/patients/types/patient.type";
+import { screeningHistoryMock } from "@/features/screenings/data/screening-history.mock";
 
 const STORAGE_KEY = "maternity_patients_mock";
 
@@ -78,6 +79,26 @@ export async function getPatientsMock(
       pageSize,
     },
   };
+}
+
+export async function getPatientByIdMock(id: string) {
+  await delay();
+
+  const patients = readPatients();
+
+  const patient = patients.find((item) => item.id === id);
+
+  if (!patient) {
+    throw new Error("Data pasien tidak ditemukan.");
+  }
+
+  return patient;
+}
+
+export async function getPatientScreeningsMock(id: string) {
+  await delay();
+
+  return screeningHistoryMock.filter((item) => item.patientId === id);
 }
 
 export async function createPatientMock(values: PatientFormValues) {
