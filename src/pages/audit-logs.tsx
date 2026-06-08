@@ -1,19 +1,12 @@
-import {
-  Card,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { AdminStatsSection } from "@/features/admin/components/admin-stats-section";
+import { AuditLogSection } from "@/features/admin/components/audit-log-section";
 
 export function AuditLogsPage() {
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Audit Logs</CardTitle>
-        <CardDescription>
-          Halaman ini nanti berisi jejak perubahan data medis.
-        </CardDescription>
-      </CardHeader>
-    </Card>
+    <div className="space-y-6">
+      <AdminStatsSection />
+
+      <AuditLogSection />
+    </div>
   );
 }
