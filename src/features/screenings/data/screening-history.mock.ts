@@ -3,6 +3,7 @@ import type { ScreeningHistory } from "@/features/screenings/types/screening-his
 export const screeningHistoryMock: ScreeningHistory[] = [
   {
     id: "1",
+    patientId: "1",
     patientName: "Siti Aminah",
     nurseName: "Ns. Rini",
     screeningDate: "2026-05-21",
@@ -13,6 +14,7 @@ export const screeningHistoryMock: ScreeningHistory[] = [
   },
   {
     id: "2",
+    patientId: "2",
     patientName: "Dewi Lestari",
     nurseName: "Ns. Rini",
     screeningDate: "2026-05-22",
@@ -23,6 +25,7 @@ export const screeningHistoryMock: ScreeningHistory[] = [
   },
   {
     id: "3",
+    patientId: "3",
     patientName: "Rina Marlina",
     nurseName: "Ns. Sari",
     screeningDate: "2026-05-23",
@@ -30,5 +33,16 @@ export const screeningHistoryMock: ScreeningHistory[] = [
     gestationalAgeWeeks: 39,
     riskScore: 12,
     riskCategory: "no_risk",
+  },
+  {
+    id: "4",
+    patientId: "1",
+    patientName: "Siti Aminah",
+    nurseName: "Ns. Sari",
+    screeningDate: "2026-06-01",
+    maternalAge: 28,
+    gestationalAgeWeeks: 37,
+    riskScore: 64,
+    riskCategory: "high_risk",
   },
 ];

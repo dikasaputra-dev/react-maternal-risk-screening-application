@@ -4,6 +4,7 @@ import type {
   PatientFormValues,
   RiskCategory,
 } from "@/features/patients/types/patient.type";
+import type { ScreeningHistory } from "@/features/screenings/types/screening-history.type";
 import type { PaginatedResponse } from "@/types/api";
 
 export type PatientListParams = {
@@ -19,6 +20,20 @@ export async function getPatients(params?: PatientListParams) {
     {
       params,
     },
+  );
+
+  return response.data;
+}
+
+export async function getPatientById(id: string) {
+  const response = await apiClient.get<Patient>(`/api/patients/${id}/`);
+
+  return response.data;
+}
+
+export async function getPatientScreenings(id: string) {
+  const response = await apiClient.get<ScreeningHistory[]>(
+    `/api/patients/${id}/screenings/`,
   );
 
   return response.data;
