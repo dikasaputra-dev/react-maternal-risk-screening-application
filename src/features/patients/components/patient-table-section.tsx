@@ -286,7 +286,7 @@ export function PatientTableSection() {
                 Reset Filter
               </Button>
 
-              {env.useMockApi && (
+              {env.mock.patients && (
                 <Button
                   variant="outline"
                   onClick={async () => {

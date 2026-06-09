@@ -4,7 +4,7 @@ export type PatientDto = {
   id: string;
   nik: string;
   full_name: string;
-  date_of_birth?: string;
+  date_of_birth: string;
   age?: number;
   address?: string | null;
   phone?: string | null;
@@ -17,7 +17,7 @@ export type PatientDto = {
 export type PatientPayloadDto = {
   nik: string;
   full_name: string;
-  date_of_birth?: string;
+  date_of_birth: string;
   address?: string | null;
   phone?: string | null;
 };

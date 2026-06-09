@@ -9,7 +9,7 @@ export function usePatients(params?: PatientListParams) {
   return useQuery({
     queryKey: patientQueryKeys.list(params),
     queryFn: () => {
-      if (env.useMockApi) {
+      if (env.mock.patients) {
         return getPatientsMock(params);
       }
 

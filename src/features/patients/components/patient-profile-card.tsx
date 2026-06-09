@@ -20,6 +20,10 @@ export function PatientProfileCard({ patient }: PatientProfileCardProps) {
       value: patient.nik,
     },
     {
+      label: "Tanggal Lahir",
+      value: patient.dateOfBirth,
+    },
+    {
       label: "Usia",
       value: `${patient.age} tahun`,
     },

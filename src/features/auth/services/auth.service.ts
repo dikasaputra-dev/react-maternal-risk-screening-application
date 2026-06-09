@@ -8,7 +8,7 @@ import type {
 export async function loginService(
   values: LoginFormValues,
 ): Promise<AuthSession> {
-  if (!env.useMockApi) {
+  if (!env.mock.auth) {
     return loginApi(values);
   }
 

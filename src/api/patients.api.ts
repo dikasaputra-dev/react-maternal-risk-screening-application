@@ -27,11 +27,7 @@ function mapPatientFormToPayload(values: PatientFormValues): PatientPayloadDto {
   return {
     nik: values.nik,
     full_name: values.fullName,
-
-    /**
-     * Sementara belum ada dateOfBirth di form.
-     * Nanti di Phase 20, form pasien sebaiknya diganti dari age → dateOfBirth.
-     */
+    date_of_birth: values.dateOfBirth,
     address: values.address ?? null,
     phone: values.phone ?? null,
   };

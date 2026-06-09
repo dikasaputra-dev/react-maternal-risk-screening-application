@@ -20,7 +20,7 @@ export function useCreatePatient() {
 
   return useMutation({
     mutationFn: (values: PatientFormValues) => {
-      if (env.useMockApi) {
+      if (env.mock.patients) {
         return createPatientMock(values);
       }
 
@@ -40,7 +40,7 @@ export function useUpdatePatient() {
 
   return useMutation({
     mutationFn: ({ id, values }: { id: string; values: PatientFormValues }) => {
-      if (env.useMockApi) {
+      if (env.mock.patients) {
         return updatePatientMock(id, values);
       }
 
@@ -60,7 +60,7 @@ export function useDeletePatient() {
 
   return useMutation({
     mutationFn: (id: string) => {
-      if (env.useMockApi) {
+      if (env.mock.patients) {
         return deletePatientMock(id);
       }
 
@@ -80,7 +80,7 @@ export function useResetPatientsMock() {
 
   return useMutation({
     mutationFn: () => {
-      if (!env.useMockApi) {
+      if (!env.mock.patients) {
         throw new Error("Reset mock hanya tersedia di mode mock.");
       }
 

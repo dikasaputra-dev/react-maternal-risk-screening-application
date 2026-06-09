@@ -7,6 +7,7 @@ import type {
   PatientFormValues,
 } from "@/features/patients/types/patient.type";
 import { screeningHistoryMock } from "@/features/screenings/data/screening-history.mock";
+import { calculateAgeFromDateOfBirth } from "@/lib/date";
 
 const STORAGE_KEY = "maternity_patients_mock";
 
@@ -109,6 +110,7 @@ export async function createPatientMock(values: PatientFormValues) {
   const newPatient: Patient = {
     id: crypto.randomUUID(),
     ...values,
+    age: calculateAgeFromDateOfBirth(values.dateOfBirth),
     lastScreeningDate: "-",
     riskCategory: "no_risk",
   };
@@ -128,6 +130,7 @@ export async function updatePatientMock(id: string, values: PatientFormValues) {
       ? {
           ...patient,
           ...values,
+          age: calculateAgeFromDateOfBirth(values.dateOfBirth),
         }
       : patient,
   );

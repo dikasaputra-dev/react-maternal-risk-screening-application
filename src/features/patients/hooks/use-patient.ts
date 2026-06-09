@@ -16,7 +16,7 @@ export function usePatient(patientId: string | undefined) {
         throw new Error("Patient ID tidak valid.");
       }
 
-      if (env.useMockApi) {
+      if (env.mock.patients) {
         return getPatientByIdMock(patientId);
       }
 
@@ -34,7 +34,7 @@ export function usePatientScreenings(patientId: string | undefined) {
         throw new Error("Patient ID tidak valid.");
       }
 
-      if (env.useMockApi) {
+      if (env.mock.patients) {
         return getPatientScreeningsMock(patientId);
       }
 
