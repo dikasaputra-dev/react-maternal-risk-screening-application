@@ -5,6 +5,7 @@ export type Patient = {
   nik: string;
   fullName: string;
   age: number;
+  dateOfBirth?: string;
   phone?: string;
   address?: string;
   lastScreeningDate: string;
@@ -18,7 +19,3 @@ export type PatientFormValues = {
   phone?: string;
   address?: string;
 };
-
-export type PatientFormErrors = Partial<
-  Record<keyof PatientFormValues, string>
->;

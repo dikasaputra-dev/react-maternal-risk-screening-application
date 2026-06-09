@@ -1,15 +1,15 @@
+import { loginApi } from "@/api/auth.api";
+import { env } from "@/config/env";
 import type {
   AuthSession,
   LoginFormValues,
 } from "@/features/auth/types/auth.type";
 
-const USE_DUMMY_AUTH = true;
-
 export async function loginService(
   values: LoginFormValues,
 ): Promise<AuthSession> {
-  if (!USE_DUMMY_AUTH) {
-    throw new Error("Real API mode belum diaktifkan.");
+  if (!env.useMockApi) {
+    return loginApi(values);
   }
 
   await new Promise((resolve) => setTimeout(resolve, 600));

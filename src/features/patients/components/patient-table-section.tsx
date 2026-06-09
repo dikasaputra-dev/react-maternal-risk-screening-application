@@ -35,6 +35,7 @@ import { ErrorState } from "@/components/ui/error-state";
 import { TableSkeleton } from "@/components/ui/table-skeleton";
 import { getAuthSession } from "@/features/auth/utils/auth-storage";
 import { hasPermission } from "@/features/auth/utils/permission";
+import { env } from "@/config/env";
 
 type RiskFilter = "all" | RiskCategory;
 
@@ -285,30 +286,32 @@ export function PatientTableSection() {
                 Reset Filter
               </Button>
 
-              <Button
-                variant="outline"
-                onClick={async () => {
-                  try {
-                    await resetPatientsMutation.mutateAsync();
+              {env.useMockApi && (
+                <Button
+                  variant="outline"
+                  onClick={async () => {
+                    try {
+                      await resetPatientsMutation.mutateAsync();
 
-                    showToast({
-                      type: "success",
-                      title: "Mock data direset",
-                      description:
-                        "Data pasien berhasil dikembalikan ke data awal.",
-                    });
-                  } catch (error) {
-                    showToast({
-                      type: "error",
-                      title: "Gagal reset mock data",
-                      description: getErrorMessage(error),
-                    });
-                  }
-                }}
-                loading={resetPatientsMutation.isPending}
-              >
-                Reset Mock
-              </Button>
+                      showToast({
+                        type: "success",
+                        title: "Mock data direset",
+                        description:
+                          "Data pasien berhasil dikembalikan ke data awal.",
+                      });
+                    } catch (error) {
+                      showToast({
+                        type: "error",
+                        title: "Gagal reset mock data",
+                        description: getErrorMessage(error),
+                      });
+                    }
+                  }}
+                  loading={resetPatientsMutation.isPending}
+                >
+                  Reset Mock
+                </Button>
+              )}
 
               {canCreatePatient && (
                 <Button onClick={handleOpenCreateModal}>Tambah Pasien</Button>
