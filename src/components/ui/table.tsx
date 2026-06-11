@@ -1,69 +1,60 @@
-import { cn } from "@/lib/utils";
-import type { HTMLAttributes, HtmlHTMLAttributes, TableHTMLAttributes } from "react";
+import type {
+  HTMLAttributes,
+  TableHTMLAttributes,
+  TdHTMLAttributes,
+  ThHTMLAttributes,
+} from "react";
 
-export function Table({
-  className,
-  ...props
-}: TableHTMLAttributes<HTMLTableElement>) {
+import { cn } from "@/lib/utils";
+
+type TableProps = TableHTMLAttributes<HTMLTableElement>;
+
+export function Table({ className, ...props }: TableProps) {
   return (
     <div className="w-full overflow-x-auto rounded-2xl border border-slate-200">
       <table
-        className={cn("w-full caption-bottom text-sm", className)}
+        className={cn("w-full min-w-[760px] text-left text-sm", className)}
         {...props}
       />
     </div>
-  )
+  );
 }
 
-export function TableHeader({
-  className,
-  ...props
-}: HtmlHTMLAttributes<HTMLTableSectionElement>) {
-  return <thead className={cn("bg-slate-50", className)} {...props} />
-}
+type TableHeaderProps = HTMLAttributes<HTMLTableSectionElement>;
 
-export function TableBody({
-  className,
-  ...props
-}: HTMLAttributes<HTMLTableSectionElement>) {
-  return <tbody className={cn("divide-y divide-slate-200", className)} {...props} />
-}
-
-export function TableRow({
-  className,
-  ...props
-}: HTMLAttributes<HTMLTableRowElement>) {
+export function TableHeader({ className, ...props }: TableHeaderProps) {
   return (
-    <tr 
-      className={cn("transition-colors hover:bg-slate-50", className)} 
-      {...props} 
-    />
-  )
+    <thead className={cn("bg-slate-50 text-slate-600", className)} {...props} />
+  );
 }
 
-export function TableHead({
-  className,
-  ...props
-}: HTMLAttributes<HTMLTableCellElement>) {
+type TableBodyProps = HTMLAttributes<HTMLTableSectionElement>;
+
+export function TableBody({ className, ...props }: TableBodyProps) {
   return (
-    <th 
-      className={cn(
-        "h-11 px-4 text-left align-middle text-xs font-semibold uppercase tracking-wide text-slate-500", 
-        className,
-      )} 
+    <tbody className={cn("divide-y divide-slate-200", className)} {...props} />
+  );
+}
+
+type TableRowProps = HTMLAttributes<HTMLTableRowElement>;
+
+export function TableRow({ className, ...props }: TableRowProps) {
+  return <tr className={cn("bg-white", className)} {...props} />;
+}
+
+type TableHeadProps = ThHTMLAttributes<HTMLTableCellElement>;
+
+export function TableHead({ className, ...props }: TableHeadProps) {
+  return (
+    <th
+      className={cn("whitespace-nowrap px-4 py-3 font-medium", className)}
       {...props}
     />
-  )
+  );
 }
 
-export function TableCell ({
-  className, 
-  ...props
-}: HTMLAttributes<HTMLTableCellElement>) {
-  return (
-    <td 
-      className={cn("px-4 py-3 align-middle text-slate-700", className)}
-      {...props}
-    />
-  )
+type TableCellProps = TdHTMLAttributes<HTMLTableCellElement>;
+
+export function TableCell({ className, ...props }: TableCellProps) {
+  return <td className={cn("px-4 py-3 align-middle", className)} {...props} />;
 }
