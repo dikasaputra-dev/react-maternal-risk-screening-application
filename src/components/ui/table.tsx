@@ -13,7 +13,7 @@ export function Table({ className, ...props }: TableProps) {
   return (
     <div className="w-full overflow-x-auto rounded-2xl border border-slate-200">
       <table
-        className={cn("w-full min-w-[760px] text-left text-sm", className)}
+        className={cn("w-full min-w-760px text-left text-sm", className)}
         {...props}
       />
     </div>
