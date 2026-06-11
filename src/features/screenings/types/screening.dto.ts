@@ -37,3 +37,16 @@ export type ScreeningDto = {
   risk_category: RiskCategory;
   created_at?: string;
 };
+
+export type ScreeningHistoryDto = {
+  id: string;
+  patient_id: string;
+  patient_name?: string;
+  nurse_name?: string;
+  screening_date?: string;
+  created_at?: string;
+  maternal_age: number;
+  gestational_age_weeks: number;
+  risk_score: number;
+  risk_category: RiskCategory;
+};

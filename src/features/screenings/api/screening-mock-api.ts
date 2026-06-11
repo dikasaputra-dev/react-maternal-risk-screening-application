@@ -1,5 +1,11 @@
+import type { ScreeningHistoryParams } from "@/api/screenings.api";
 import { getAuthSession } from "@/features/auth/utils/auth-storage";
-import type { ScreeningDto } from "@/features/screenings/types/screening.dto";
+import { screeningHistoryMock } from "@/features/screenings/data/screening-history.mock";
+import { mapScreeningHistoryDtoToHistory } from "@/features/screenings/mappers/screening.mapper";
+import type {
+  ScreeningDto,
+  ScreeningHistoryDto,
+} from "@/features/screenings/types/screening.dto";
 import type {
   ScreeningFormValues,
   ScreeningResult,
@@ -26,6 +32,54 @@ function readScreenings(): ScreeningDto[] {
 
 function writeScreenings(screenings: ScreeningDto[]) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(screenings));
+}
+
+function mapStoredScreeningToHistoryDto(
+  screening: ScreeningDto,
+): ScreeningHistoryDto {
+  return {
+    id: screening.id,
+    patient_id: screening.patient_id,
+    patient_name: screening.patient_name ?? `Patient ${screening.patient_id}`,
+    nurse_name: screening.nurse_name ?? "Unknown",
+    maternal_age: screening.maternal_age,
+    gestational_age_weeks: screening.gestational_age_weeks,
+    risk_score: screening.risk_score,
+    risk_category: screening.risk_category,
+    created_at: screening.created_at,
+  };
+}
+
+export async function getScreeningHistoryMock(params?: ScreeningHistoryParams) {
+  await delay();
+
+  const storedHistories = readScreenings().map((item) =>
+    mapScreeningHistoryDtoToHistory(mapStoredScreeningToHistoryDto(item)),
+  );
+
+  const histories = [...storedHistories, ...screeningHistoryMock];
+
+  return histories.filter((item) => {
+    const keyword = params?.search?.toLowerCase() ?? "";
+
+    const matchSearch =
+      !keyword ||
+      item.patientName.toLowerCase().includes(keyword) ||
+      item.nurseName.toLowerCase().includes(keyword);
+
+    const matchRisk =
+      !params?.risk ||
+      params.risk === "all" ||
+      item.riskCategory === params.risk;
+
+    const matchStartDate =
+      !params?.startDate || item.screeningDate >= params.startDate;
+
+    const matchEndDate =
+      !params?.endDate || item.screeningDate <= params.endDate;
+
+    return matchSearch && matchRisk && matchStartDate && matchEndDate;
+  });
 }
 
 export async function submitScreeningMock(

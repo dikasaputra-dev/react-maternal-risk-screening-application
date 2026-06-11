@@ -2,18 +2,23 @@ import { apiClient } from "@/api/client";
 import {
   mapScreeningDtoToResult,
   mapScreeningFormToPayload,
+  mapScreeningHistoryDtosToHistories,
 } from "@/features/screenings/mappers/screening.mapper";
-import type { ScreeningHistory } from "@/features/screenings/types/screening-history.type";
-import type { ScreeningDto } from "@/features/screenings/types/screening.dto";
+
 import type {
+  ScreeningDto,
+  ScreeningHistoryDto,
+} from "@/features/screenings/types/screening.dto";
+import type {
+  RiskCategory,
   ScreeningFormValues,
   ScreeningResult,
 } from "@/features/screenings/types/screening.type";
-import { unwrapApiData } from "@/lib/api-response";
+import { unwrapApiData, unwrapApiList } from "@/lib/api-response";
 
 export type ScreeningHistoryParams = {
   search?: string;
-  riskCategory?: string;
+  risk?: "all" | RiskCategory;
   startDate?: string;
   endDate?: string;
 };
@@ -31,12 +36,16 @@ export async function submitScreening(
 }
 
 export async function getScreeningHistory(params?: ScreeningHistoryParams) {
-  const response = await apiClient.get<ScreeningHistory[]>(
-    "/api/screenings/history/",
-    {
-      params,
+  const response = await apiClient.get("/api/screenings/history/", {
+    params: {
+      search: params?.search,
+      risk_category: params?.risk === "all" ? undefined : params?.risk,
+      start_date: params?.startDate,
+      end_date: params?.endDate,
     },
-  );
+  });
 
-  return unwrapApiData<ScreeningHistory[]>(response.data);
+  const dtos = unwrapApiList<ScreeningHistoryDto>(response.data);
+
+  return mapScreeningHistoryDtosToHistories(dtos);
 }

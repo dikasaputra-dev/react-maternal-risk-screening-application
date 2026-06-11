@@ -7,6 +7,13 @@ type ApiEnvelope<T> = {
   data: T;
 };
 
+type ApiListEnvelope<T> = {
+  success?: boolean;
+  message?: string;
+  code?: string | number;
+  data: T[];
+};
+
 type ApiPaginatedEnvelope<T> = {
   success?: boolean;
   message?: string;
@@ -30,12 +37,37 @@ type DrfPaginatedResponse<T> = {
   results: T[];
 };
 
+type DrfListResponse<T> = {
+  count: number;
+  next: string | null;
+  previous: string | null;
+  results: T[];
+};
+
 export function unwrapApiData<T>(payload: ApiEnvelope<T> | T): T {
   if (payload && typeof payload === "object" && "data" in payload) {
     return (payload as ApiEnvelope<T>).data;
   }
 
   return payload as T;
+}
+
+export function unwrapApiList<T>(
+  payload: ApiListEnvelope<T> | DrfListResponse<T> | T[],
+): T[] {
+  if (Array.isArray(payload)) {
+    return payload;
+  }
+
+  if ("results" in payload) {
+    return payload.results;
+  }
+
+  if ("data" in payload) {
+    return payload.data;
+  }
+
+  return [];
 }
 
 export function normalizePaginatedResponse<T>(

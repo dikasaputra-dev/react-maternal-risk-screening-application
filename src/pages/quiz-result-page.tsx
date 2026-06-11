@@ -8,77 +8,79 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { ErrorState } from "@/components/ui/error-state";
+import { TableSkeleton } from "@/components/ui/table-skeleton";
 import { ScreeningRiskBadge } from "@/features/screenings/components/screening-risk-badge";
-import { getQuizResultByToken } from "@/features/quiz/utils/quiz-storage";
+import { useQuizResult } from "@/features/quiz/hooks/use-quiz";
 
 export function QuizResultPage() {
   const { token } = useParams<{ token: string }>();
 
-  const result = token ? getQuizResultByToken(token) : null;
+  const { data: result, isLoading, isError } = useQuizResult(token);
 
-  if (!result) {
+  if (isLoading) {
+    return <TableSkeleton rows={3} columns={2} />;
+  }
+
+  if (isError || !result) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Hasil Tidak Ditemukan</CardTitle>
-          <CardDescription>
-            Token hasil kuis tidak valid atau data sudah tidak tersedia di
-            browser ini.
-          </CardDescription>
-        </CardHeader>
-
-        <CardContent>
+      <ErrorState
+        title="Hasil kuis tidak ditemukan"
+        description="Token hasil kuis tidak valid atau data sudah tidak tersedia."
+        action={
           <Link to="/quiz">
-            <Button>Isi Kuis Lagi</Button>
+            <Button variant="outline">Kembali ke Kuis</Button>
           </Link>
-        </CardContent>
-      </Card>
+        }
+      />
     );
   }
 
   return (
-    <Card className="mx-auto max-w-2xl">
-      <CardHeader>
-        <CardTitle>Hasil Kuis Skrining</CardTitle>
-        <CardDescription>
-          Berikut estimasi risiko awal berdasarkan data yang Anda isi.
-        </CardDescription>
-      </CardHeader>
+    <div className="mx-auto max-w-2xl space-y-6">
+      <Card>
+        <CardHeader>
+          <CardTitle>Hasil Kuis Skrining Awal</CardTitle>
+          <CardDescription>
+            Hasil ini bersifat skrining awal dan bukan diagnosis medis.
+          </CardDescription>
+        </CardHeader>
 
-      <CardContent>
-        <div className="space-y-6">
-          <div className="rounded-2xl bg-slate-50 p-6 text-center">
-            <p className="text-sm text-slate-500">Skor Risiko</p>
-            <p className="mt-2 text-5xl font-bold text-slate-900">
-              {result.riskScore}
-            </p>
+        <CardContent>
+          <div className="space-y-6">
+            <div className="rounded-2xl bg-slate-50 p-6">
+              <p className="text-sm text-slate-500">Skor Risiko</p>
+              <p className="mt-2 text-5xl font-bold text-slate-900">
+                {result.riskScore}
+              </p>
+            </div>
 
-            <div className="mt-4">
+            <div>
+              <p className="mb-2 text-sm font-medium text-slate-700">
+                Kategori Risiko
+              </p>
               <ScreeningRiskBadge risk={result.riskCategory} />
             </div>
-          </div>
 
-          <div className="rounded-xl bg-blue-50 p-4 text-sm text-blue-800">
-            Simpan link hasil ini jika diperlukan. Pada implementasi backend,
-            hasil akan diakses melalui session token dari server.
-          </div>
+            <div className="rounded-2xl border border-slate-200 p-4">
+              <p className="text-sm font-medium text-slate-900">Rekomendasi</p>
+              <p className="mt-2 text-sm leading-6 text-slate-600">
+                {result.recommendation}
+              </p>
+            </div>
 
-          <div className="rounded-xl bg-red-50 p-4 text-sm text-red-800">
-            Kuis ini bukan diagnosis medis. Untuk keputusan klinis, tetap
-            lakukan pemeriksaan langsung dengan bidan, perawat, atau dokter.
-          </div>
+            <p className="text-xs text-slate-500">
+              Submitted at: {result.submittedAt}
+            </p>
 
-          <div className="flex justify-end gap-2">
             <Link to="/quiz">
-              <Button variant="outline">Isi Ulang</Button>
-            </Link>
-
-            <Link to="/dashboard">
-              <Button>Kembali ke Dashboard</Button>
+              <Button variant="outline" className="w-full">
+                Isi Kuis Lagi
+              </Button>
             </Link>
           </div>
-        </div>
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+    </div>
   );
 }
