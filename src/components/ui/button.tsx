@@ -2,18 +2,8 @@ import type { ButtonHTMLAttributes, ReactNode } from "react";
 
 import { cn } from "@/lib/utils";
 
-type ButtonVariant = 
-  | "primary" 
-  | "secondary" 
-  | "outline" 
-  | "danger" 
-  | "ghost";
-  
-type ButtonSize = 
-  | "sm" 
-  | "md" 
-  | "lg" 
-  | "icon";
+type ButtonVariant = "primary" | "secondary" | "outline" | "danger" | "ghost";
+type ButtonSize = "sm" | "md" | "lg" | "icon";
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   children: ReactNode;
@@ -29,15 +19,17 @@ export function Button({
   loading = false,
   disabled,
   className,
+  type = "button",
   ...props
 }: ButtonProps) {
   const baseStyles =
-    "inline-flex items-center justify-center rounded-xl font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 disabled:pointer-events-none disabled:opacity-50";
+    "inline-flex items-center justify-center rounded-xl font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50";
 
   const variants: Record<ButtonVariant, string> = {
     primary: "bg-blue-600 text-white hover:bg-blue-700",
     secondary: "bg-slate-200 text-slate-900 hover:bg-slate-300",
-    outline: "border border-slate-300 bg-white text-slate-900 hover:bg-slate-100",
+    outline:
+      "border border-slate-300 bg-white text-slate-900 hover:bg-slate-100",
     danger: "bg-red-600 text-white hover:bg-red-700",
     ghost: "text-slate-700 hover:bg-slate-100",
   };
@@ -51,7 +43,9 @@ export function Button({
 
   return (
     <button
+      type={type}
       disabled={disabled || loading}
+      aria-busy={loading}
       className={cn(baseStyles, variants[variant], sizes[size], className)}
       {...props}
     >

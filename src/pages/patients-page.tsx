@@ -1,5 +1,7 @@
 import { PatientTableSection } from "@/features/patients/components/patient-table-section";
 
 export function PatientsPage() {
-  return <PatientTableSection />;
+  <div className="space-y-6">
+    <PatientTableSection />;
+  </div>;
 }

@@ -1,164 +1,57 @@
 # React + TypeScript + Vite
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+ENV
+✓ VITE*API_BASE_URL sudah domain backend production
+✓ Semua VITE_MOCK*\* false
+✓ Tidak ada secret di VITE\_ env
 
-Currently, two official plugins are available:
+BUILD
+✓ npm run typecheck berhasil
+✓ npm run build berhasil
+✓ npm run preview berhasil
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+ROUTING
+✓ vercel.json sudah ada
+✓ Refresh di dynamic route tidak 404
 
-## React Compiler
+AUTH
+✓ Login real backend berhasil
+✓ access_token tersimpan
+✓ /api/me/ berhasil
+✓ Sidebar sesuai role
+✓ Route admin hanya untuk admin
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+PATIENTS
+✓ List patients dari API
+✓ Search jalan
+✓ Pagination jalan
+✓ Detail patient jalan
+✓ Create patient jalan
+✓ Update patient jalan
+✓ Delete patient jalan
 
-## Expanding the ESLint configuration
+SCREENINGS
+✓ Submit screening jalan
+✓ Payload snake_case benar
+✓ History screening muncul
+✓ Filter history jalan
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+QUIZ
+✓ Submit public quiz jalan
+✓ Redirect ke result page
+✓ Result token bisa dibuka ulang
 
-```js
-export default defineConfig([
-  globalIgnores(["dist"]),
-  {
-    files: ["**/*.{ts,tsx}"],
-    extends: [
-      // Other configs...
+ADMIN
+✓ Admin stats muncul
+✓ Audit logs muncul
+✓ Filter audit logs jalan
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+UI
+✓ Mobile sidebar jalan
+✓ Table responsive
+✓ Modal bisa close pakai Escape
+✓ Loading dan error state tampil baik
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ["./tsconfig.node.json", "./tsconfig.app.json"],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-]);
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-
-src/
-│
-├── app/
-│   ├── providers/
-│   ├── router/
-│   └── store/
-│
-├── components/
-│   └── ui/
-│       ├── button.tsx
-│       ├── input.tsx
-│       ├── card.tsx
-│       ├── badge.tsx
-│       ├── modal.tsx
-│       ├── table.tsx
-│       └── data-table.tsx
-│
-├── features/
-│   ├── auth/
-│   │   ├── api/
-│   │   ├── components/
-│   │   ├── hooks/
-│   │   ├── pages/
-│   │   ├── schemas/
-│   │   ├── types/
-│   │   └── store/
-│   │
-│   ├── patients/
-│   │   ├── api/
-│   │   ├── components/
-│   │   ├── hooks/
-│   │   ├── pages/
-│   │   ├── types/
-│   │   └── schemas/
-│   │
-│   ├── screenings/
-│   ├── quiz/
-│   └── admin/
-│
-├── layouts/
-│   ├── dashboard-layout.tsx
-│   └── auth-layout.tsx
-│
-├── lib/
-│   ├── utils.ts
-│   ├── axios.ts
-│   └── cn.ts
-│
-├── types/
-│   └── api.ts
-│
-├── constants/
-│   └── routes.ts
-│
-├── hooks/
-│
-├── styles/
-│   └── globals.css
-│
-├── main.tsx
-└── vite-env.d.ts
-
-
-Komponen yang Akan Kita Bangun Setelah Ini
-Phase 1
-Button
-Input
-Card
-Badge
-Table
-Sidebar
-Navbar
-Phase 2
-Patient Table
-Screening Form
-Risk Badge
-Analytics Card
-Audit Log Table
-Phase 3
-Dashboard Page
-Patients Page
-Screening History
-Public Quiz UI
-Phase 4
-Charts
-Search
-Filtering
-Pagination
-Empty state
-Skeleton loading
 ```
