@@ -1,12 +1,10 @@
+import { env } from "@/config/env";
 import { clearAuthSession } from "@/features/auth/utils/auth-storage";
 import { tokenStorage } from "@/features/auth/utils/token-storage";
 import axios from "axios";
 
-const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8000";
-
 export const apiClient = axios.create({
-  baseURL: API_BASE_URL,
+  baseURL: env.apiBaseUrl,
   headers: {
     "Content-Type": "application/json",
   },

@@ -13,15 +13,14 @@ import {
   resetPatientsMock,
   updatePatientMock,
 } from "@/features/patients/api/patient-mock-api";
-
-const USE_MOCK_DATA = true;
+import { env } from "@/config/env";
 
 export function useCreatePatient() {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: (values: PatientFormValues) => {
-      if (USE_MOCK_DATA) {
+      if (env.mock.patients) {
         return createPatientMock(values);
       }
 
@@ -41,7 +40,7 @@ export function useUpdatePatient() {
 
   return useMutation({
     mutationFn: ({ id, values }: { id: string; values: PatientFormValues }) => {
-      if (USE_MOCK_DATA) {
+      if (env.mock.patients) {
         return updatePatientMock(id, values);
       }
 
@@ -61,7 +60,7 @@ export function useDeletePatient() {
 
   return useMutation({
     mutationFn: (id: string) => {
-      if (USE_MOCK_DATA) {
+      if (env.mock.patients) {
         return deletePatientMock(id);
       }
 
@@ -80,7 +79,13 @@ export function useResetPatientsMock() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: resetPatientsMock,
+    mutationFn: () => {
+      if (!env.mock.patients) {
+        throw new Error("Reset mock hanya tersedia di mode mock.");
+      }
+
+      return resetPatientsMock();
+    },
 
     onSuccess: () => {
       queryClient.invalidateQueries({

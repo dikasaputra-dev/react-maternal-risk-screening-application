@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -8,10 +8,13 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { ErrorState } from "@/components/ui/error-state";
 import { Input } from "@/components/ui/input";
-import type { RiskCategory } from "@/features/screenings/types/screening.type";
-import { screeningHistoryMock } from "@/features/screenings/data/screening-history.mock";
-import { ScreeningHistoryTable } from "@/features/screenings/components/screening-history-table";
+import { TableSkeleton } from "@/components/ui/table-skeleton";
+
+import { ScreeningHistoryTable } from "./screening-history-table";
+import { useScreeningHistory } from "../hooks/use-screening-history";
+import type { RiskCategory } from "../types/screening.type";
 
 type RiskFilter = "all" | RiskCategory;
 
@@ -27,39 +30,40 @@ const riskOptions: {
 
 export function ScreeningHistorySection() {
   const [search, setSearch] = useState("");
-  const [riskFilter, setRiskFilter] = useState<RiskFilter>("all");
+  const [risk, setRisk] = useState<RiskFilter>("all");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
 
-  const filteredHistories = useMemo(() => {
-    return screeningHistoryMock.filter((item) => {
-      const keyword = search.toLowerCase();
-
-      const matchSearch =
-        item.patientName.toLowerCase().includes(keyword) ||
-        item.nurseName.toLowerCase().includes(keyword);
-
-      const matchRisk =
-        riskFilter === "all" || item.riskCategory === riskFilter;
-
-      const matchStartDate = !startDate || item.screeningDate >= startDate;
-
-      const matchEndDate = !endDate || item.screeningDate <= endDate;
-
-      return matchSearch && matchRisk && matchStartDate && matchEndDate;
-    });
-  }, [search, riskFilter, startDate, endDate]);
-
-  const handleExport = () => {
-    console.log("Export dummy:", filteredHistories);
-    alert("Export dummy berhasil. Data bisa dilihat di console browser.");
-  };
+  const {
+    data: histories = [],
+    isLoading,
+    isError,
+    refetch,
+  } = useScreeningHistory({
+    search,
+    risk,
+    startDate,
+    endDate,
+  });
 
   const handleResetFilter = () => {
     setSearch("");
-    setRiskFilter("all");
+    setRisk("all");
     setStartDate("");
     setEndDate("");
+  };
+
+  const handleExport = () => {
+    const rows = histories.map((item) => ({
+      patientName: item.patientName,
+      nurseName: item.nurseName,
+      screeningDate: item.screeningDate,
+      riskScore: item.riskScore,
+      riskCategory: item.riskCategory,
+    }));
+
+    console.table(rows);
+    alert("Export dummy berhasil. Data tampil di console browser.");
   };
 
   return (
@@ -67,19 +71,21 @@ export function ScreeningHistorySection() {
       <CardHeader>
         <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
           <div>
-            <CardTitle>Riwayat Skrining</CardTitle>
+            <CardTitle>Screening History</CardTitle>
             <CardDescription>
-              Pantau hasil skrining pasien berdasarkan tanggal dan kategori
-              risiko.
+              Riwayat skrining pasien berdasarkan filter pencarian, risiko, dan
+              tanggal.
             </CardDescription>
           </div>
 
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
             <Button variant="outline" onClick={handleResetFilter}>
               Reset Filter
             </Button>
 
-            <Button onClick={handleExport}>Export</Button>
+            <Button variant="outline" onClick={handleExport}>
+              Export
+            </Button>
           </div>
         </div>
       </CardHeader>
@@ -87,7 +93,7 @@ export function ScreeningHistorySection() {
       <CardContent>
         <div className="mb-4 grid gap-3 xl:grid-cols-[1.5fr_1fr_1fr]">
           <Input
-            placeholder="Cari pasien atau perawat..."
+            placeholder="Cari nama pasien atau perawat..."
             value={search}
             onChange={(event) => setSearch(event.target.value)}
           />
@@ -109,7 +115,7 @@ export function ScreeningHistorySection() {
 
         <div className="mb-4 flex flex-wrap gap-2">
           {riskOptions.map((option) => {
-            const isActive = riskFilter === option.value;
+            const isActive = risk === option.value;
 
             return (
               <Button
@@ -117,7 +123,7 @@ export function ScreeningHistorySection() {
                 type="button"
                 size="sm"
                 variant={isActive ? "primary" : "outline"}
-                onClick={() => setRiskFilter(option.value)}
+                onClick={() => setRisk(option.value)}
               >
                 {option.label}
               </Button>
@@ -125,7 +131,21 @@ export function ScreeningHistorySection() {
           })}
         </div>
 
-        <ScreeningHistoryTable histories={filteredHistories} />
+        {isLoading ? (
+          <TableSkeleton rows={5} columns={6} />
+        ) : isError ? (
+          <ErrorState
+            title="Gagal memuat riwayat skrining"
+            description="Terjadi kesalahan saat mengambil data riwayat skrining."
+            action={
+              <Button variant="outline" onClick={() => refetch()}>
+                Coba Lagi
+              </Button>
+            }
+          />
+        ) : (
+          <ScreeningHistoryTable histories={histories} />
+        )}
       </CardContent>
     </Card>
   );

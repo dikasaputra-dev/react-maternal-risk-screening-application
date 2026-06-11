@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -8,13 +8,14 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { ErrorState } from "@/components/ui/error-state";
 import { Input } from "@/components/ui/input";
-
+import { TableSkeleton } from "@/components/ui/table-skeleton";
 import type {
   AuditAction,
   AuditModelName,
 } from "@/features/admin/types/admin.type";
-import { auditLogsMock } from "@/features/admin/data/admin.mock";
+import { useAuditLogs } from "@/features/admin/hooks/use-admin";
 import { AuditLogTable } from "@/features/admin/components/audit-log-table";
 
 type ActionFilter = "all" | AuditAction;
@@ -51,33 +52,18 @@ export function AuditLogSection() {
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
 
-  const filteredLogs = useMemo(() => {
-    return auditLogsMock.filter((log) => {
-      const keyword = search.toLowerCase();
-
-      const matchSearch =
-        !keyword ||
-        log.userName.toLowerCase().includes(keyword) ||
-        log.description.toLowerCase().includes(keyword) ||
-        log.ipAddress?.toLowerCase().includes(keyword) ||
-        log.objectId?.toLowerCase().includes(keyword);
-
-      const matchAction = actionFilter === "all" || log.action === actionFilter;
-
-      const matchModel = modelFilter === "all" || log.modelName === modelFilter;
-
-      const matchStartDate = !startDate || log.createdAt >= startDate;
-      const matchEndDate = !endDate || log.createdAt <= endDate;
-
-      return (
-        matchSearch &&
-        matchAction &&
-        matchModel &&
-        matchStartDate &&
-        matchEndDate
-      );
-    });
-  }, [search, actionFilter, modelFilter, startDate, endDate]);
+  const {
+    data: logs = [],
+    isLoading,
+    isError,
+    refetch,
+  } = useAuditLogs({
+    search,
+    action: actionFilter,
+    model: modelFilter,
+    startDate,
+    endDate,
+  });
 
   const handleResetFilter = () => {
     setSearch("");
@@ -177,7 +163,21 @@ export function AuditLogSection() {
           </div>
         </div>
 
-        <AuditLogTable logs={filteredLogs} />
+        {isLoading ? (
+          <TableSkeleton rows={6} columns={7} />
+        ) : isError ? (
+          <ErrorState
+            title="Gagal memuat audit logs"
+            description="Terjadi kesalahan saat mengambil data audit logs."
+            action={
+              <Button variant="outline" onClick={() => refetch()}>
+                Coba Lagi
+              </Button>
+            }
+          />
+        ) : (
+          <AuditLogTable logs={logs} />
+        )}
       </CardContent>
     </Card>
   );

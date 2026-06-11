@@ -1,48 +1,40 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
-import { ScreeningRiskBadge } from "@/features/screenings/components/screening-risk-badge";
-import { medicalHistoryOptions } from "@/features/screenings/constants/screening-options";
 
 import type { QuizFormValues } from "@/features/quiz/types/quiz.type";
-import { calculateQuizResult } from "@/features/quiz/utils/quiz-calculator";
-import { saveQuizResult } from "@/features/quiz/utils/quiz-storage";
+import { getErrorMessage } from "@/lib/error";
+import { useToast } from "@/components/ui/toast-context";
+import { useSubmitQuiz } from "@/features/quiz/hooks/use-quiz";
 
 const initialForm: QuizFormValues = {
   maternalAge: 0,
   gestationalAgeWeeks: 37,
   systolicBp: 120,
   diastolicBp: 80,
-  estimatedFetalWeight: 3000,
-  medicalHistory: {
-    diabetes: false,
-    hypertension: false,
-    asthma: false,
-    heart_disease: false,
-    preeclampsia_history: false,
-  },
+  hasBleeding: false,
+  hasSevereHeadache: false,
+  hasSwollenHandsFace: false,
+  hasFever: false,
+  hasReducedFetalMovement: false,
 };
 
 export function PublicQuizForm() {
-  const navigate = useNavigate();
   const [form, setForm] = useState<QuizFormValues>(initialForm);
 
-  const previewResult = useMemo(() => {
-    return calculateQuizResult(form);
-  }, [form]);
+  const navigate = useNavigate();
+  const { showToast } = useToast();
+  const submitQuizMutation = useSubmitQuiz();
 
   const handleNumberChange = (
-    field: keyof Omit<QuizFormValues, "medicalHistory">,
+    field: keyof Pick<
+      QuizFormValues,
+      "maternalAge" | "gestationalAgeWeeks" | "systolicBp" | "diastolicBp"
+    >,
     value: string,
   ) => {
     setForm((prev) => ({
@@ -51,157 +43,147 @@ export function PublicQuizForm() {
     }));
   };
 
-  const handleMedicalHistoryChange = (
-    key: keyof QuizFormValues["medicalHistory"],
+  const handleBooleanChange = (
+    field: keyof Pick<
+      QuizFormValues,
+      | "hasBleeding"
+      | "hasSevereHeadache"
+      | "hasSwollenHandsFace"
+      | "hasFever"
+      | "hasReducedFetalMovement"
+    >,
     checked: boolean,
   ) => {
     setForm((prev) => ({
       ...prev,
-      medicalHistory: {
-        ...prev.medicalHistory,
-        [key]: checked,
-      },
+      [field]: checked,
     }));
   };
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    const result = calculateQuizResult(form);
+    try {
+      const result = await submitQuizMutation.mutateAsync(form);
 
-    saveQuizResult(result);
+      showToast({
+        type: "success",
+        title: "Kuis berhasil dikirim",
+        description: "Hasil kuis berhasil dibuat.",
+      });
 
-    navigate(`/quiz/results/${result.token}`);
+      navigate(`/quiz/results/${result.token}`);
+    } catch (error) {
+      showToast({
+        type: "error",
+        title: "Gagal mengirim kuis",
+        description: getErrorMessage(error),
+      });
+    }
   };
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="grid gap-6 lg:grid-cols-[1fr_320px]"
-    >
-      <section className="space-y-6">
-        <Card>
-          <CardHeader>
-            <CardTitle>Kuis Skrining Awal Persalinan</CardTitle>
-            <CardDescription>
-              Isi data umum untuk mendapatkan estimasi kategori risiko awal.
-              Kuis ini tidak menggantikan pemeriksaan tenaga kesehatan.
-            </CardDescription>
-          </CardHeader>
+    <Card>
+      <CardContent className="p-6">
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="grid gap-4 md:grid-cols-2">
+            <Input
+              label="Usia Ibu"
+              type="number"
+              value={form.maternalAge || ""}
+              onChange={(event) =>
+                handleNumberChange("maternalAge", event.target.value)
+              }
+            />
 
-          <CardContent>
-            <div className="grid gap-4 md:grid-cols-2">
-              <Input
-                id="quizMaternalAge"
-                type="number"
-                label="Usia Ibu"
-                value={form.maternalAge || ""}
-                onChange={(event) =>
-                  handleNumberChange("maternalAge", event.target.value)
-                }
-              />
+            <Input
+              label="Usia Kehamilan Minggu"
+              type="number"
+              value={form.gestationalAgeWeeks}
+              onChange={(event) =>
+                handleNumberChange("gestationalAgeWeeks", event.target.value)
+              }
+            />
 
-              <Input
-                id="quizGestationalAgeWeeks"
-                type="number"
-                label="Usia Kehamilan (minggu)"
-                value={form.gestationalAgeWeeks}
-                onChange={(event) =>
-                  handleNumberChange("gestationalAgeWeeks", event.target.value)
-                }
-              />
+            <Input
+              label="Sistolik"
+              type="number"
+              value={form.systolicBp}
+              onChange={(event) =>
+                handleNumberChange("systolicBp", event.target.value)
+              }
+            />
 
-              <Input
-                id="quizSystolicBp"
-                type="number"
-                label="Tekanan Darah Sistolik"
-                value={form.systolicBp}
-                onChange={(event) =>
-                  handleNumberChange("systolicBp", event.target.value)
-                }
-              />
+            <Input
+              label="Diastolik"
+              type="number"
+              value={form.diastolicBp}
+              onChange={(event) =>
+                handleNumberChange("diastolicBp", event.target.value)
+              }
+            />
+          </div>
 
-              <Input
-                id="quizDiastolicBp"
-                type="number"
-                label="Tekanan Darah Diastolik"
-                value={form.diastolicBp}
-                onChange={(event) =>
-                  handleNumberChange("diastolicBp", event.target.value)
-                }
-              />
+          <div className="grid gap-3 md:grid-cols-2">
+            <Checkbox
+              label="Perdarahan"
+              description="Ada perdarahan selama kehamilan."
+              checked={form.hasBleeding}
+              onChange={(event) =>
+                handleBooleanChange("hasBleeding", event.target.checked)
+              }
+            />
 
-              <Input
-                id="quizEstimatedFetalWeight"
-                type="number"
-                label="TBJ / Taksiran Berat Janin (gram)"
-                value={form.estimatedFetalWeight}
-                onChange={(event) =>
-                  handleNumberChange("estimatedFetalWeight", event.target.value)
-                }
-              />
-            </div>
-          </CardContent>
-        </Card>
+            <Checkbox
+              label="Sakit kepala berat"
+              description="Sakit kepala berat atau pandangan kabur."
+              checked={form.hasSevereHeadache}
+              onChange={(event) =>
+                handleBooleanChange("hasSevereHeadache", event.target.checked)
+              }
+            />
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Riwayat Penyakit</CardTitle>
-            <CardDescription>
-              Pilih jika memiliki riwayat penyakit berikut.
-            </CardDescription>
-          </CardHeader>
+            <Checkbox
+              label="Bengkak wajah/tangan"
+              description="Bengkak pada wajah atau tangan."
+              checked={form.hasSwollenHandsFace}
+              onChange={(event) =>
+                handleBooleanChange("hasSwollenHandsFace", event.target.checked)
+              }
+            />
 
-          <CardContent>
-            <div className="grid gap-3 md:grid-cols-2">
-              {medicalHistoryOptions.map((item) => (
-                <Checkbox
-                  key={item.key}
-                  label={item.label}
-                  description={item.description}
-                  checked={form.medicalHistory[item.key]}
-                  onChange={(event) =>
-                    handleMedicalHistoryChange(item.key, event.target.checked)
-                  }
-                />
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      </section>
+            <Checkbox
+              label="Demam"
+              description="Mengalami demam atau infeksi."
+              checked={form.hasFever}
+              onChange={(event) =>
+                handleBooleanChange("hasFever", event.target.checked)
+              }
+            />
 
-      <aside>
-        <Card className="sticky top-6">
-          <CardHeader>
-            <CardTitle>Preview Hasil</CardTitle>
-          </CardHeader>
+            <Checkbox
+              label="Gerakan janin berkurang"
+              description="Gerakan janin terasa berkurang dari biasanya."
+              checked={form.hasReducedFetalMovement}
+              onChange={(event) =>
+                handleBooleanChange(
+                  "hasReducedFetalMovement",
+                  event.target.checked,
+                )
+              }
+            />
+          </div>
 
-          <CardContent>
-            <div className="space-y-4">
-              <div>
-                <p className="text-sm text-slate-500">Skor Risiko</p>
-                <p className="text-4xl font-bold text-slate-900">
-                  {previewResult.riskScore}
-                </p>
-              </div>
-
-              <div>
-                <p className="mb-2 text-sm text-slate-500">Kategori</p>
-                <ScreeningRiskBadge risk={previewResult.riskCategory} />
-              </div>
-
-              <div className="rounded-xl bg-amber-50 p-4 text-sm text-amber-800">
-                Hasil ini hanya estimasi awal. Segera hubungi tenaga kesehatan
-                bila muncul tanda bahaya atau risiko tinggi.
-              </div>
-
-              <Button type="submit" className="w-full">
-                Lihat Hasil
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      </aside>
-    </form>
+          <Button
+            type="submit"
+            className="w-full"
+            loading={submitQuizMutation.isPending}
+            disabled={submitQuizMutation.isPending}
+          >
+            Lihat Hasil Kuis
+          </Button>
+        </form>
+      </CardContent>
+    </Card>
   );
 }

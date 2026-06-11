@@ -16,6 +16,9 @@ import {
 } from "@/features/screenings/constants/screening-options";
 import { calculateRisk } from "@/features/screenings/utils/risk-calculator";
 import { ScreeningRiskBadge } from "@/features/screenings/components/screening-risk-badge";
+import { useToast } from "@/components/ui/toast-context";
+import { useSubmitScreening } from "@/features/screenings/hooks/use-screening-mutations";
+import { getErrorMessage } from "@/lib/error";
 
 const initialForm: ScreeningFormValues = {
   patientId: "",
@@ -48,6 +51,9 @@ export function ScreeningForm() {
   const riskResult = useMemo(() => {
     return calculateRisk(form);
   }, [form]);
+
+  const { showToast } = useToast();
+  const submitScreeningMutation = useSubmitScreening();
 
   const handleNumberChange = (
     field: keyof Omit<
@@ -85,16 +91,34 @@ export function ScreeningForm() {
     }));
   };
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    console.log({
-      ...form,
-      riskScore: riskResult.riskScore,
-      riskCategory: riskResult.riskCategory,
-    });
+    if (!form.patientId) {
+      showToast({
+        type: "error",
+        title: "Pasien belum dipilih",
+        description: "Masukkan atau pilih pasien sebelum submit skrining.",
+      });
 
-    alert("Data skrining dummy berhasil disubmit. Cek console browser.");
+      return;
+    }
+
+    try {
+      const result = await submitScreeningMutation.mutateAsync(form);
+
+      showToast({
+        type: "success",
+        title: "Skrining berhasil disubmit",
+        description: `Kategori risiko: ${result.riskCategory}, skor: ${result.riskScore}.`,
+      });
+    } catch (error) {
+      showToast({
+        type: "error",
+        title: "Gagal submit skrining",
+        description: getErrorMessage(error),
+      });
+    }
   };
 
   return (
@@ -110,6 +134,19 @@ export function ScreeningForm() {
 
           <CardContent>
             <div className="grid gap-4 md:grid-cols-2">
+              <Input
+                id="patientId"
+                label="Patient ID"
+                placeholder="Masukkan ID pasien"
+                value={form.patientId}
+                onChange={(event) =>
+                  setForm((prev) => ({
+                    ...prev,
+                    patientId: event.target.value,
+                  }))
+                }
+              />
+
               <Input
                 id="maternalAge"
                 type="number"
@@ -262,7 +299,12 @@ export function ScreeningForm() {
                 dari backend saat submit.
               </div>
 
-              <Button type="submit" className="w-full">
+              <Button
+                type="submit"
+                className="w-full"
+                loading={submitScreeningMutation.isPending}
+                disabled={submitScreeningMutation.isPending}
+              >
                 Submit Skrining
               </Button>
             </div>

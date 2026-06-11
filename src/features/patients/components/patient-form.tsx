@@ -15,7 +15,7 @@ import {
 
 type PatientFormProps = {
   initialData?: Patient | null;
-  onSubmit: (values: PatientFormValues) => void;
+  onSubmit: (values: PatientFormValues) => void | Promise<void>;
   onCancel: () => void;
   isSubmitting?: boolean;
 };
@@ -29,7 +29,7 @@ export function PatientForm({
   const [form, setForm] = useState<PatientFormValues>({
     nik: initialData?.nik ?? "",
     fullName: initialData?.fullName ?? "",
-    age: initialData?.age ?? 0,
+    dateOfBirth: initialData?.dateOfBirth ?? "",
     phone: initialData?.phone ?? "",
     address: initialData?.address ?? "",
   });
@@ -39,17 +39,14 @@ export function PatientForm({
 
   const liveErrors = useMemo(() => {
     if (!isTouched) return {};
+
     return validatePatientForm(form);
   }, [form, isTouched]);
 
   const visibleErrors = isTouched ? liveErrors : errors;
-
   const isInvalid = hasPatientFormErrors(validatePatientForm(form));
 
-  const handleChange = (
-    field: keyof PatientFormValues,
-    value: string | number,
-  ) => {
+  const handleChange = (field: keyof PatientFormValues, value: string) => {
     setForm((prev) => ({
       ...prev,
       [field]: value,
@@ -58,31 +55,31 @@ export function PatientForm({
     setIsTouched(true);
   };
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     const nextErrors = validatePatientForm(form);
+
     setErrors(nextErrors);
     setIsTouched(true);
 
     if (hasPatientFormErrors(nextErrors)) return;
 
-    onSubmit({
-      ...form,
+    await onSubmit({
       nik: form.nik.trim(),
       fullName: form.fullName.trim(),
+      dateOfBirth: form.dateOfBirth,
       phone: form.phone?.trim(),
       address: form.address?.trim(),
-      age: Number(form.age),
     });
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-py-4">
+    <form onSubmit={handleSubmit} className="space-y-4">
       <Input
         id="nik"
         label="NIK"
-        placeholder="Masukkan NIK"
+        placeholder="Masukkan NIK 16 digit"
         value={form.nik}
         error={visibleErrors.nik}
         onChange={(event) => handleChange("nik", event.target.value)}
@@ -98,19 +95,18 @@ export function PatientForm({
       />
 
       <Input
-        id="age"
-        label="Usia"
-        type="number"
-        placeholder="Masukkan usia"
-        value={form.age}
-        error={visibleErrors.age}
-        onChange={(event) => handleChange("age", event.target.value)}
+        id="dateOfBirth"
+        label="Tanggal Lahir"
+        type="date"
+        value={form.dateOfBirth}
+        error={visibleErrors.dateOfBirth}
+        onChange={(event) => handleChange("dateOfBirth", event.target.value)}
       />
 
       <Input
         id="phone"
         label="No. HP"
-        placeholder="Contoh: 08xxxxxxxxx"
+        placeholder="Contoh: 081234567890"
         value={form.phone}
         error={visibleErrors.phone}
         onChange={(event) => handleChange("phone", event.target.value)}

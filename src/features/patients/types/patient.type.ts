@@ -4,6 +4,7 @@ export type Patient = {
   id: string;
   nik: string;
   fullName: string;
+  dateOfBirth: string;
   age: number;
   phone?: string;
   address?: string;
@@ -14,7 +15,7 @@ export type Patient = {
 export type PatientFormValues = {
   nik: string;
   fullName: string;
-  age: number;
+  dateOfBirth: string;
   phone?: string;
   address?: string;
 };

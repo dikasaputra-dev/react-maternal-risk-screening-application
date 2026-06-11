@@ -2,6 +2,7 @@ import type {
   PatientFormErrors,
   PatientFormValues,
 } from "@/features/patients/types/patient.type";
+import { calculateAgeFromDateOfBirth } from "@/lib/date";
 
 export function validatePatientForm(
   values: PatientFormValues,
@@ -11,7 +12,7 @@ export function validatePatientForm(
   if (!values.nik.trim()) {
     errors.nik = "NIK wajib diisi.";
   } else if (!/^\d{16}$/.test(values.nik)) {
-    errors.nik = "NIK harus terdiri dari 16 digin angka.";
+    errors.nik = "NIK harus terdiri dari 16 digit angka.";
   }
 
   if (!values.fullName.trim()) {
@@ -20,10 +21,21 @@ export function validatePatientForm(
     errors.fullName = "Nama minimal 3 karakter.";
   }
 
-  if (!values.age) {
-    errors.age = "Usia wajib diisi.";
-  } else if (values.age < 10 || values.age > 60) {
-    errors.age = "Usia ibu harus berada di rentang 10–60 tahun.";
+  if (!values.dateOfBirth) {
+    errors.dateOfBirth = "Tanggal lahir wajib diisi.";
+  } else {
+    const selectedDate = new Date(values.dateOfBirth);
+    const today = new Date();
+
+    if (selectedDate > today) {
+      errors.dateOfBirth = "Tanggal lahir tidak boleh di masa depan.";
+    }
+
+    const age = calculateAgeFromDateOfBirth(values.dateOfBirth);
+
+    if (age < 10 || age > 60) {
+      errors.dateOfBirth = "Usia ibu harus berada di rentang 10–60 tahun.";
+    }
   }
 
   if (values.phone && !/^[0-9+ -]{8,20}$/.test(values.phone)) {

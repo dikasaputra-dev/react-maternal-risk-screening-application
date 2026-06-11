@@ -6,8 +6,7 @@ import {
   getPatientByIdMock,
   getPatientScreeningsMock,
 } from "@/features/patients/api/patient-mock-api";
-
-const USE_MOCK_DATA = true;
+import { env } from "@/config/env";
 
 export function usePatient(patientId: string | undefined) {
   return useQuery({
@@ -17,7 +16,7 @@ export function usePatient(patientId: string | undefined) {
         throw new Error("Patient ID tidak valid.");
       }
 
-      if (USE_MOCK_DATA) {
+      if (env.mock.patients) {
         return getPatientByIdMock(patientId);
       }
 
@@ -35,7 +34,7 @@ export function usePatientScreenings(patientId: string | undefined) {
         throw new Error("Patient ID tidak valid.");
       }
 
-      if (USE_MOCK_DATA) {
+      if (env.mock.patients) {
         return getPatientScreeningsMock(patientId);
       }
 
