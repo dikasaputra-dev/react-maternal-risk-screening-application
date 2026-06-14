@@ -19,16 +19,6 @@ export const dashboardNavigation: NavigationItem[] = [
     requiredPermission: "view_patients",
   },
   {
-    label: "Screenings",
-    href: "/screenings",
-    requiredPermission: "view_screenings",
-  },
-  {
-    label: "History",
-    href: "/screenings/history",
-    requiredPermission: "view_screening_history",
-  },
-  {
     label: "Audit Logs",
     href: "/admin/audit-logs",
     allowedRoles: ["admin"],

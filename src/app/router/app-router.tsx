@@ -1,39 +1,41 @@
+import { Navigate, createBrowserRouter } from "react-router-dom";
+
 import { ProtectedRoute } from "@/components/layout/protected-route";
+import { PatientWorkflowLayout } from "@/features/patients/components/patient-workflow-layout";
 import { DashboardLayout } from "@/layouts/dashboard-layout";
 import { PublicLayout } from "@/layouts/public-layout";
-import { AuditLogsPage } from "@/pages/audit-logs";
+import { AuditLogsPage } from "@/pages/audit-logs-page";
+import { ClinicalActionsPage } from "@/pages/clinical-actions-page";
 import { DashboardPage } from "@/pages/dashboard-page";
+import { DeliveryOutcomePage } from "@/pages/delivery-outcome-page";
+import { InitialScreeningPage } from "@/pages/initial-screening-page";
+import { LaborMonitoringPage } from "@/pages/labor-monitoring-page";
 import { LoginPage } from "@/pages/login-page";
-import { PatientDetailPage } from "@/pages/patient-detail-page";
+import { NewbornOutcomePage } from "@/pages/newborn-outcome-page";
 import { PatientsPage } from "@/pages/patients-page";
+import { PatientWorkflowRedirect } from "@/pages/patient-workflow-redirect";
 import { QuizPage } from "@/pages/quiz-page";
 import { QuizResultPage } from "@/pages/quiz-result-page";
-import { ScreeningHistoryPage } from "@/pages/screenings-history-page";
-import { ScreeningsPage } from "@/pages/screenings-page";
-import { createBrowserRouter, Navigate } from "react-router-dom";
 
 export const appRouter = createBrowserRouter([
   {
-    path: "/",
-    element: <Navigate to="/dashboard" replace />,
-  },
-  {
-    path: "/login",
-    element: <LoginPage />,
-  },
-  {
     element: <PublicLayout />,
     children: [
+      {
+        path: "/login",
+        element: <LoginPage />,
+      },
       {
         path: "/quiz",
         element: <QuizPage />,
       },
       {
-        path: "quiz/results/:token",
+        path: "/quiz/results/:token",
         element: <QuizResultPage />,
       },
     ],
   },
+
   {
     element: (
       <ProtectedRoute
@@ -55,20 +57,39 @@ export const appRouter = createBrowserRouter([
           },
           {
             path: "/patients/:patientId",
-            element: <PatientDetailPage />,
-          },
-          {
-            path: "/screenings",
-            element: <ScreeningsPage />,
-          },
-          {
-            path: "/screenings/history",
-            element: <ScreeningHistoryPage />,
+            element: <PatientWorkflowLayout />,
+            children: [
+              {
+                index: true,
+                element: <PatientWorkflowRedirect />,
+              },
+              {
+                path: "screening",
+                element: <InitialScreeningPage />,
+              },
+              {
+                path: "monitoring",
+                element: <LaborMonitoringPage />,
+              },
+              {
+                path: "actions",
+                element: <ClinicalActionsPage />,
+              },
+              {
+                path: "delivery-outcome",
+                element: <DeliveryOutcomePage />,
+              },
+              {
+                path: "newborn-outcome",
+                element: <NewbornOutcomePage />,
+              },
+            ],
           },
         ],
       },
     ],
   },
+
   {
     element: (
       <ProtectedRoute
@@ -87,5 +108,15 @@ export const appRouter = createBrowserRouter([
         ],
       },
     ],
+  },
+
+  {
+    path: "/",
+    element: <Navigate to="/dashboard" replace />,
+  },
+
+  {
+    path: "*",
+    element: <Navigate to="/dashboard" replace />,
   },
 ]);
