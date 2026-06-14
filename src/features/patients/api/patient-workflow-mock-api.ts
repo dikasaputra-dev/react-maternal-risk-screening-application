@@ -97,6 +97,30 @@ export function completeInitialScreeningWorkflowMock(
   return updatedWorkflow;
 }
 
+export function setLaborMonitoringCountWorkflowMock(
+  patientId: string,
+  monitoringEntryCount: number,
+  updatedAt: string,
+) {
+  const workflows = readWorkflowStorage();
+
+  const currentWorkflow =
+    workflows[patientId] ?? createDefaultPatientWorkflow(patientId);
+
+  const updatedWorkflow: PatientWorkflowStatus = {
+    ...currentWorkflow,
+    monitoringEntryCount,
+    updatedAt,
+  };
+
+  writeWorkflowStorage({
+    ...workflows,
+    [patientId]: updatedWorkflow,
+  });
+
+  return updatedWorkflow;
+}
+
 export function removePatientWorkflowMock(patientId: string) {
   const workflows = readWorkflowStorage();
 

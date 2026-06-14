@@ -1,6 +1,7 @@
 import type { PatientListParams } from "@/api/patients.api";
 import { riskCategoryConfig } from "@/features/clinical-risk/constants/risk-config";
 import { resetInitialScreeningMockStorage } from "@/features/initial-screening/api/initial-screening-mock-api";
+import { resetLaborMonitoringMockStorage } from "@/features/labor-monitoring/api/labor-monitoring-mock-api";
 import { screeningHistoryMock } from "@/features/screenings/data/screening-history.mock";
 import type { ScreeningHistory } from "@/features/screenings/types/screening-history.type";
 import type { PaginatedResponse } from "@/types/api";
@@ -207,6 +208,7 @@ export async function resetPatientsMock() {
   resetPatientsMockStorage();
   resetPatientWorkflowMockStorage();
   resetInitialScreeningMockStorage();
+  resetLaborMonitoringMockStorage();
 
   return patientsMock;
 }
