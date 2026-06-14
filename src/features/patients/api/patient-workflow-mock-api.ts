@@ -71,6 +71,32 @@ export function ensurePatientWorkflowMock(patientId: string) {
   return workflow;
 }
 
+export function completeInitialScreeningWorkflowMock(
+  patientId: string,
+  initialScreeningId: string,
+  completedAt: string,
+) {
+  const workflows = readWorkflowStorage();
+
+  const currentWorkflow =
+    workflows[patientId] ?? createDefaultPatientWorkflow(patientId);
+
+  const updatedWorkflow: PatientWorkflowStatus = {
+    ...currentWorkflow,
+    hasInitialScreening: true,
+    initialScreeningId,
+    initialScreeningCompletedAt: completedAt,
+    updatedAt: completedAt,
+  };
+
+  writeWorkflowStorage({
+    ...workflows,
+    [patientId]: updatedWorkflow,
+  });
+
+  return updatedWorkflow;
+}
+
 export function removePatientWorkflowMock(patientId: string) {
   const workflows = readWorkflowStorage();
 

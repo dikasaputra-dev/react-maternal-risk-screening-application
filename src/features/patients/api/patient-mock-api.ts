@@ -1,9 +1,16 @@
 import type { PatientListParams } from "@/api/patients.api";
 import { riskCategoryConfig } from "@/features/clinical-risk/constants/risk-config";
+import { resetInitialScreeningMockStorage } from "@/features/initial-screening/api/initial-screening-mock-api";
 import { screeningHistoryMock } from "@/features/screenings/data/screening-history.mock";
 import type { ScreeningHistory } from "@/features/screenings/types/screening-history.type";
 import type { PaginatedResponse } from "@/types/api";
 
+import {
+  findPatientMock,
+  readPatientsMockStorage,
+  resetPatientsMockStorage,
+  writePatientsMockStorage,
+} from "./patient-mock-storage";
 import {
   ensurePatientWorkflowMock,
   removePatientWorkflowMock,
@@ -16,46 +23,10 @@ import {
 import { patientsMock } from "../data/patients.mock";
 import type { Patient, PatientFormValues } from "../types/patient.type";
 
-const STORAGE_KEY = "maternity_patients_mock_v3";
-
 function delay(milliseconds = 400) {
   return new Promise<void>((resolve) => {
     window.setTimeout(resolve, milliseconds);
   });
-}
-
-function seedPatientsIfEmpty() {
-  const existingData = localStorage.getItem(STORAGE_KEY);
-
-  if (!existingData) {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(patientsMock));
-  }
-}
-
-function readPatients(): Patient[] {
-  seedPatientsIfEmpty();
-
-  const rawData = localStorage.getItem(STORAGE_KEY);
-
-  if (!rawData) {
-    return [];
-  }
-
-  try {
-    const parsedData: unknown = JSON.parse(rawData);
-
-    if (!Array.isArray(parsedData)) {
-      return [];
-    }
-
-    return parsedData as Patient[];
-  } catch {
-    return [];
-  }
-}
-
-function writePatients(patients: Patient[]) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(patients));
 }
 
 function matchesSearch(patient: Patient, search: string) {
@@ -91,7 +62,7 @@ export async function getPatientsMock(
 
   const search = params?.search?.trim().toLowerCase() ?? "";
 
-  const filteredPatients = readPatients().filter((patient) =>
+  const filteredPatients = readPatientsMockStorage().filter((patient) =>
     matchesSearch(patient, search),
   );
 
@@ -122,7 +93,7 @@ export async function getPatientsMock(
 export async function getPatientByIdMock(patientId: string) {
   await delay();
 
-  const patient = readPatients().find((item) => item.id === patientId);
+  const patient = findPatientMock(patientId);
 
   if (!patient) {
     throw new Error("Data pasien tidak ditemukan.");
@@ -153,9 +124,9 @@ export async function createPatientMock(values: PatientFormValues) {
     updatedAt: timestamp,
   };
 
-  const patients = readPatients();
+  const patients = readPatientsMockStorage();
 
-  writePatients([patient, ...patients]);
+  writePatientsMockStorage([patient, ...patients]);
 
   ensurePatientWorkflowMock(patient.id);
 
@@ -172,9 +143,9 @@ export async function updatePatientMock(
     throw new Error("Agama dan pendidikan pasien wajib dipilih.");
   }
 
-  const patients = readPatients();
+  const patients = readPatientsMockStorage();
 
-  const existingPatient = patients.find((patient) => patient.id === patientId);
+  const existingPatient = findPatientMock(patientId);
 
   if (!existingPatient) {
     throw new Error("Data pasien tidak ditemukan.");
@@ -191,7 +162,7 @@ export async function updatePatientMock(
     updatedAt: new Date().toISOString(),
   };
 
-  writePatients(
+  writePatientsMockStorage(
     patients.map((patient) =>
       patient.id === patientId ? updatedPatient : patient,
     ),
@@ -203,7 +174,7 @@ export async function updatePatientMock(
 export async function deletePatientMock(patientId: string) {
   await delay();
 
-  const patients = readPatients();
+  const patients = readPatientsMockStorage();
 
   const patientExists = patients.some((patient) => patient.id === patientId);
 
@@ -211,7 +182,9 @@ export async function deletePatientMock(patientId: string) {
     throw new Error("Data pasien tidak ditemukan.");
   }
 
-  writePatients(patients.filter((patient) => patient.id !== patientId));
+  writePatientsMockStorage(
+    patients.filter((patient) => patient.id !== patientId),
+  );
 
   removePatientWorkflowMock(patientId);
 
@@ -231,9 +204,9 @@ export async function getPatientScreeningsMock(
 export async function resetPatientsMock() {
   await delay();
 
-  writePatients(patientsMock);
-
+  resetPatientsMockStorage();
   resetPatientWorkflowMockStorage();
+  resetInitialScreeningMockStorage();
 
   return patientsMock;
 }
