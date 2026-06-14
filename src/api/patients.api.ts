@@ -1,64 +1,50 @@
-import { apiClient } from "@/api/client";
+import { apiClient } from "./client";
+
+import { normalizePaginatedResponse, unwrapApiData } from "@/lib/api-response";
 import {
-  mapPatientDtosToPatients,
   mapPatientDtoToPatient,
+  mapPatientDtosToPatients,
+  mapPatientFormToPayload,
 } from "@/features/patients/mappers/patient.mapper";
-import type {
-  PatientDto,
-  PatientPayloadDto,
-} from "@/features/patients/types/patient.dto";
+import type { PatientDto } from "@/features/patients/types/patient.dto";
 import type {
   Patient,
   PatientFormValues,
-  RiskCategory,
 } from "@/features/patients/types/patient.type";
 import type { ScreeningHistory } from "@/features/screenings/types/screening-history.type";
-import { normalizePaginatedResponse, unwrapApiData } from "@/lib/api-response";
 import type { PaginatedResponse } from "@/types/api";
 
 export type PatientListParams = {
   search?: string;
-  risk?: "all" | RiskCategory;
   page?: number;
   pageSize?: number;
 };
-
-function mapPatientFormToPayload(values: PatientFormValues): PatientPayloadDto {
-  return {
-    nik: values.nik,
-    full_name: values.fullName,
-    date_of_birth: values.dateOfBirth,
-    address: values.address ?? null,
-    phone: values.phone ?? null,
-  };
-}
 
 export async function getPatients(
   params?: PatientListParams,
 ): Promise<PaginatedResponse<Patient>> {
   const response = await apiClient.get("/api/patients/", {
     params: {
-      search: params?.search,
-      risk: params?.risk === "all" ? undefined : params?.risk,
+      search: params?.search || undefined,
       page: params?.page,
       page_size: params?.pageSize,
     },
   });
 
-  const normalized = normalizePaginatedResponse<PatientDto>(
+  const normalizedResponse = normalizePaginatedResponse<PatientDto>(
     response.data,
     params?.page,
     params?.pageSize,
   );
 
   return {
-    data: mapPatientDtosToPatients(normalized.data),
-    pagination: normalized.pagination,
+    data: mapPatientDtosToPatients(normalizedResponse.data),
+    pagination: normalizedResponse.pagination,
   };
 }
 
-export async function getPatientById(id: string): Promise<Patient> {
-  const response = await apiClient.get(`/api/patients/${id}/`);
+export async function getPatientById(patientId: string): Promise<Patient> {
+  const response = await apiClient.get(`/api/patients/${patientId}/`);
 
   const dto = unwrapApiData<PatientDto>(response.data);
 
@@ -78,27 +64,27 @@ export async function createPatient(
 }
 
 export async function updatePatient(
-  id: string,
+  patientId: string,
   values: PatientFormValues,
 ): Promise<Patient> {
   const payload = mapPatientFormToPayload(values);
 
-  const response = await apiClient.put(`/api/patients/${id}/`, payload);
+  const response = await apiClient.put(`/api/patients/${patientId}/`, payload);
 
   const dto = unwrapApiData<PatientDto>(response.data);
 
   return mapPatientDtoToPatient(dto);
 }
 
-export async function deletePatient(id: string) {
-  await apiClient.delete(`/api/patients/${id}/`);
+export async function deletePatient(patientId: string) {
+  await apiClient.delete(`/api/patients/${patientId}/`);
 
-  return id;
+  return patientId;
 }
 
-export async function getPatientScreenings(id: string) {
+export async function getPatientScreenings(patientId: string) {
   const response = await apiClient.get<ScreeningHistory[]>(
-    `/api/patients/${id}/screenings/`,
+    `/api/patients/${patientId}/screenings/`,
   );
 
   return unwrapApiData<ScreeningHistory[]>(response.data);
