@@ -1,4 +1,5 @@
 import type { PatientListParams } from "@/api/patients.api";
+import { resetClinicalActionMockStorage } from "@/features/clinical-actions/api/clinical-actions-mock-api";
 import { riskCategoryConfig } from "@/features/clinical-risk/constants/risk-config";
 import { resetInitialScreeningMockStorage } from "@/features/initial-screening/api/initial-screening-mock-api";
 import { resetLaborMonitoringMockStorage } from "@/features/labor-monitoring/api/labor-monitoring-mock-api";
@@ -59,6 +60,7 @@ export async function getPatientsMock(
   await delay();
 
   const page = params?.page ?? 1;
+
   const pageSize = params?.pageSize ?? 5;
 
   const search = params?.search?.trim().toLowerCase() ?? "";
@@ -114,13 +116,21 @@ export async function createPatientMock(values: PatientFormValues) {
 
   const patient: Patient = {
     id: crypto.randomUUID(),
+
     fullName: values.fullName.trim(),
+
     dateOfBirth: values.dateOfBirth,
+
     religion: values.religion,
+
     education: values.education,
+
     occupation: values.occupation.trim(),
+
     race: values.race.trim(),
+
     latestRisk: null,
+
     createdAt: timestamp,
     updatedAt: timestamp,
   };
@@ -154,12 +164,19 @@ export async function updatePatientMock(
 
   const updatedPatient: Patient = {
     ...existingPatient,
+
     fullName: values.fullName.trim(),
+
     dateOfBirth: values.dateOfBirth,
+
     religion: values.religion,
+
     education: values.education,
+
     occupation: values.occupation.trim(),
+
     race: values.race.trim(),
+
     updatedAt: new Date().toISOString(),
   };
 
@@ -209,6 +226,7 @@ export async function resetPatientsMock() {
   resetPatientWorkflowMockStorage();
   resetInitialScreeningMockStorage();
   resetLaborMonitoringMockStorage();
+  resetClinicalActionMockStorage();
 
   return patientsMock;
 }
