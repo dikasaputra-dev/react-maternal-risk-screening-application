@@ -5,47 +5,85 @@ import { Navbar } from "@/components/layout/navbar";
 import { MobileSidebar, Sidebar } from "@/components/layout/sidebar";
 import { SkipLink } from "@/components/layout/skip-link";
 
-const pageMeta: Record<
-  string,
-  {
-    title: string;
-    subtitle: string;
-  }
-> = {
+type PageMeta = {
+  title: string;
+  subtitle: string;
+};
+
+const staticPageMeta: Record<string, PageMeta> = {
   "/dashboard": {
     title: "Dashboard",
-    subtitle: "Ringkasan data skrining dan pasien.",
+    subtitle: "Ringkasan pelayanan pasien bersalin.",
   },
+
   "/patients": {
     title: "Patients",
-    subtitle: "Kelola data pasien ibu hamil.",
+    subtitle: "Kelola identitas dan pelayanan pasien.",
   },
-  "/screenings": {
-    title: "Screenings",
-    subtitle: "Form skrining awal persalinan.",
-  },
-  "/screenings/history": {
-    title: "Screening History",
-    subtitle: "Riwayat hasil skrining pasien.",
-  },
+
   "/admin/audit-logs": {
     title: "Audit Logs",
-    subtitle: "Pantau aktivitas sistem dan user.",
+    subtitle: "Pantau aktivitas dan perubahan data sistem.",
   },
 };
 
-function getPageMeta(pathname: string) {
-  if (pathname.startsWith("/patients/")) {
+function getPatientWorkflowPageMeta(pathname: string): PageMeta | null {
+  if (!pathname.startsWith("/patients/")) {
+    return null;
+  }
+
+  if (pathname.endsWith("/screening")) {
     return {
-      title: "Patient Detail",
-      subtitle: "Detail pasien dan riwayat skrining.",
+      title: "Skrining Awal",
+      subtitle: "Pengkajian awal kondisi pasien bersalin.",
     };
   }
 
+  if (pathname.endsWith("/monitoring")) {
+    return {
+      title: "Pemantauan Persalinan",
+      subtitle: "Pemantauan kondisi ibu dan janin secara berkala.",
+    };
+  }
+
+  if (pathname.endsWith("/actions")) {
+    return {
+      title: "Tindakan",
+      subtitle: "Pencatatan tindakan dan keputusan klinis.",
+    };
+  }
+
+  if (pathname.endsWith("/delivery-outcome")) {
+    return {
+      title: "Luaran Persalinan",
+      subtitle: "Pencatatan hasil akhir proses persalinan.",
+    };
+  }
+
+  if (pathname.endsWith("/newborn-outcome")) {
+    return {
+      title: "Luaran Kelahiran Bayi",
+      subtitle: "Pencatatan kondisi bayi setelah kelahiran.",
+    };
+  }
+
+  return {
+    title: "Detail Pasien",
+    subtitle: "Identitas dan alur pelayanan pasien.",
+  };
+}
+
+function getPageMeta(pathname: string): PageMeta {
+  const patientWorkflowMeta = getPatientWorkflowPageMeta(pathname);
+
+  if (patientWorkflowMeta) {
+    return patientWorkflowMeta;
+  }
+
   return (
-    pageMeta[pathname] ?? {
-      title: "Dashboard",
-      subtitle: "Clinical Screening System",
+    staticPageMeta[pathname] ?? {
+      title: "MaternityCare",
+      subtitle: "Sistem manajemen pasien bersalin.",
     }
   );
 }
