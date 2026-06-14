@@ -247,7 +247,7 @@ Artinya auth sudah memakai backend real, tetapi module lain masih memakai mock.
 Clone repository:
 
 ```bash
-git clone https://github.com/your-username/your-repository.git
+git clone https://github.com/dikasaputra-dev/your-repository.git
 cd your-repository
 ```
 
