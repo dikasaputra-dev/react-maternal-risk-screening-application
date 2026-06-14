@@ -71,6 +71,126 @@ export function ensurePatientWorkflowMock(patientId: string) {
   return workflow;
 }
 
+export function completeInitialScreeningWorkflowMock(
+  patientId: string,
+  initialScreeningId: string,
+  completedAt: string,
+) {
+  const workflows = readWorkflowStorage();
+
+  const currentWorkflow =
+    workflows[patientId] ?? createDefaultPatientWorkflow(patientId);
+
+  const updatedWorkflow: PatientWorkflowStatus = {
+    ...currentWorkflow,
+    hasInitialScreening: true,
+    initialScreeningId,
+    initialScreeningCompletedAt: completedAt,
+    updatedAt: completedAt,
+  };
+
+  writeWorkflowStorage({
+    ...workflows,
+    [patientId]: updatedWorkflow,
+  });
+
+  return updatedWorkflow;
+}
+
+export function setLaborMonitoringCountWorkflowMock(
+  patientId: string,
+  monitoringEntryCount: number,
+  updatedAt: string,
+) {
+  const workflows = readWorkflowStorage();
+
+  const currentWorkflow =
+    workflows[patientId] ?? createDefaultPatientWorkflow(patientId);
+
+  const updatedWorkflow: PatientWorkflowStatus = {
+    ...currentWorkflow,
+    monitoringEntryCount,
+    updatedAt,
+  };
+
+  writeWorkflowStorage({
+    ...workflows,
+    [patientId]: updatedWorkflow,
+  });
+
+  return updatedWorkflow;
+}
+
+export function setClinicalActionCountWorkflowMock(
+  patientId: string,
+  clinicalActionCount: number,
+  updatedAt: string,
+) {
+  const workflows = readWorkflowStorage();
+
+  const currentWorkflow =
+    workflows[patientId] ?? createDefaultPatientWorkflow(patientId);
+
+  const updatedWorkflow: PatientWorkflowStatus = {
+    ...currentWorkflow,
+    clinicalActionCount,
+    updatedAt,
+  };
+
+  writeWorkflowStorage({
+    ...workflows,
+    [patientId]: updatedWorkflow,
+  });
+
+  return updatedWorkflow;
+}
+
+export function completeDeliveryOutcomeWorkflowMock(
+  patientId: string,
+  completedAt: string,
+) {
+  const workflows = readWorkflowStorage();
+
+  const currentWorkflow =
+    workflows[patientId] ?? createDefaultPatientWorkflow(patientId);
+
+  const updatedWorkflow: PatientWorkflowStatus = {
+    ...currentWorkflow,
+    hasDeliveryOutcome: true,
+    updatedAt: completedAt,
+  };
+
+  writeWorkflowStorage({
+    ...workflows,
+    [patientId]: updatedWorkflow,
+  });
+
+  return updatedWorkflow;
+}
+
+export function completeNewbornOutcomeWorkflowMock(
+  patientId: string,
+  completedAt: string,
+) {
+  const workflows = readWorkflowStorage();
+
+  const currentWorkflow =
+    workflows[patientId] ?? createDefaultPatientWorkflow(patientId);
+
+  const updatedWorkflow: PatientWorkflowStatus = {
+    ...currentWorkflow,
+    hasNewbornOutcome: true,
+    updatedAt: completedAt,
+  };
+
+  writeWorkflowStorage({
+    ...workflows,
+    [patientId]: updatedWorkflow,
+  });
+
+  return updatedWorkflow;
+}
+
 export function removePatientWorkflowMock(patientId: string) {
   const workflows = readWorkflowStorage();
 
