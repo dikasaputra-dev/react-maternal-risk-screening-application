@@ -4,6 +4,7 @@ import { riskCategoryConfig } from "@/features/clinical-risk/constants/risk-conf
 import { resetDeliveryOutcomeMockStorage } from "@/features/delivery-outcomes/api/delivery-outcome-mock-api";
 import { resetInitialScreeningMockStorage } from "@/features/initial-screening/api/initial-screening-mock-api";
 import { resetLaborMonitoringMockStorage } from "@/features/labor-monitoring/api/labor-monitoring-mock-api";
+import { resetNewbornOutcomeMockStorage } from "@/features/newborn-outcomes/api/newborn-outcome-mock-api";
 import { screeningHistoryMock } from "@/features/screenings/data/screening-history.mock";
 import type { ScreeningHistory } from "@/features/screenings/types/screening-history.type";
 import type { PaginatedResponse } from "@/types/api";
@@ -230,6 +231,7 @@ export async function resetPatientsMock() {
   resetLaborMonitoringMockStorage();
   resetClinicalActionMockStorage();
   resetDeliveryOutcomeMockStorage();
+  resetNewbornOutcomeMockStorage();
 
   return patientsMock;
 }

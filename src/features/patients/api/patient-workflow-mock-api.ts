@@ -168,6 +168,29 @@ export function completeDeliveryOutcomeWorkflowMock(
   return updatedWorkflow;
 }
 
+export function completeNewbornOutcomeWorkflowMock(
+  patientId: string,
+  completedAt: string,
+) {
+  const workflows = readWorkflowStorage();
+
+  const currentWorkflow =
+    workflows[patientId] ?? createDefaultPatientWorkflow(patientId);
+
+  const updatedWorkflow: PatientWorkflowStatus = {
+    ...currentWorkflow,
+    hasNewbornOutcome: true,
+    updatedAt: completedAt,
+  };
+
+  writeWorkflowStorage({
+    ...workflows,
+    [patientId]: updatedWorkflow,
+  });
+
+  return updatedWorkflow;
+}
+
 export function removePatientWorkflowMock(patientId: string) {
   const workflows = readWorkflowStorage();
 
