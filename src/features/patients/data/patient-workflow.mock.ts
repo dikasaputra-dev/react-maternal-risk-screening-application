@@ -36,6 +36,18 @@ export const patientWorkflowMock: Record<string, PatientWorkflowStatus> = {
     hasNewbornOutcome: true,
     updatedAt: "2026-06-14T05:45:00.000Z",
   },
+
+  "4": {
+    patientId: "4",
+    hasInitialScreening: true,
+    initialScreeningId: "initial-screening-4",
+    initialScreeningCompletedAt: "2026-06-13T16:15:00.000Z",
+    monitoringEntryCount: 4,
+    clinicalActionCount: 2,
+    hasDeliveryOutcome: false,
+    hasNewbornOutcome: false,
+    updatedAt: "2026-06-14T12:45:00.000Z",
+  },
 };
 
 export function createDefaultPatientWorkflow(

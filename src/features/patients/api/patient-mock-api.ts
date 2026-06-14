@@ -1,8 +1,14 @@
 import type { PatientListParams } from "@/api/patients.api";
+import { riskCategoryConfig } from "@/features/clinical-risk/constants/risk-config";
 import { screeningHistoryMock } from "@/features/screenings/data/screening-history.mock";
 import type { ScreeningHistory } from "@/features/screenings/types/screening-history.type";
 import type { PaginatedResponse } from "@/types/api";
 
+import {
+  ensurePatientWorkflowMock,
+  removePatientWorkflowMock,
+  resetPatientWorkflowMockStorage,
+} from "./patient-workflow-mock-api";
 import {
   educationLabelMap,
   religionLabelMap,
@@ -10,7 +16,7 @@ import {
 import { patientsMock } from "../data/patients.mock";
 import type { Patient, PatientFormValues } from "../types/patient.type";
 
-const STORAGE_KEY = "maternity_patients_mock_v2";
+const STORAGE_KEY = "maternity_patients_mock_v3";
 
 function delay(milliseconds = 400) {
   return new Promise<void>((resolve) => {
@@ -57,6 +63,10 @@ function matchesSearch(patient: Patient, search: string) {
     return true;
   }
 
+  const riskLabel = patient.latestRisk
+    ? riskCategoryConfig[patient.latestRisk.category].label
+    : "Belum Dinilai";
+
   const searchableValues = [
     patient.fullName,
     patient.occupation,
@@ -65,6 +75,7 @@ function matchesSearch(patient: Patient, search: string) {
     religionLabelMap[patient.religion],
     patient.education,
     educationLabelMap[patient.education],
+    riskLabel,
   ];
 
   return searchableValues.some((value) => value.toLowerCase().includes(search));
@@ -137,6 +148,7 @@ export async function createPatientMock(values: PatientFormValues) {
     education: values.education,
     occupation: values.occupation.trim(),
     race: values.race.trim(),
+    latestRisk: null,
     createdAt: timestamp,
     updatedAt: timestamp,
   };
@@ -144,6 +156,8 @@ export async function createPatientMock(values: PatientFormValues) {
   const patients = readPatients();
 
   writePatients([patient, ...patients]);
+
+  ensurePatientWorkflowMock(patient.id);
 
   return patient;
 }
@@ -199,6 +213,8 @@ export async function deletePatientMock(patientId: string) {
 
   writePatients(patients.filter((patient) => patient.id !== patientId));
 
+  removePatientWorkflowMock(patientId);
+
   return patientId;
 }
 
@@ -216,6 +232,8 @@ export async function resetPatientsMock() {
   await delay();
 
   writePatients(patientsMock);
+
+  resetPatientWorkflowMockStorage();
 
   return patientsMock;
 }
