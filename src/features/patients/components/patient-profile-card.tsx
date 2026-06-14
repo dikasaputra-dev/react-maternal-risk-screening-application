@@ -1,4 +1,3 @@
-import { Badge } from "@/components/ui/badge";
 import {
   Card,
   CardContent,
@@ -6,8 +5,17 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { RiskBadge } from "@/features/patients/components/risk-badge";
-import type { Patient } from "@/features/patients/types/patient.type";
+import {
+  calculateAgeFromDateOfBirth,
+  formatDate,
+  formatDateTime,
+} from "@/lib/date";
+
+import {
+  educationLabelMap,
+  religionLabelMap,
+} from "../constants/patient-options";
+import type { Patient } from "../types/patient.type";
 
 type PatientProfileCardProps = {
   patient: Patient;
@@ -16,66 +24,62 @@ type PatientProfileCardProps = {
 export function PatientProfileCard({ patient }: PatientProfileCardProps) {
   const profileItems = [
     {
-      label: "NIK",
-      value: patient.nik,
-    },
-    {
       label: "Tanggal Lahir",
-      value: patient.dateOfBirth,
+      value: formatDate(patient.dateOfBirth),
     },
     {
       label: "Usia",
-      value: `${patient.age} tahun`,
+      value: `${calculateAgeFromDateOfBirth(patient.dateOfBirth)} tahun`,
     },
     {
-      label: "No. HP",
-      value: patient.phone || "-",
+      label: "Agama",
+      value: religionLabelMap[patient.religion],
     },
     {
-      label: "Alamat",
-      value: patient.address || "-",
+      label: "Pendidikan",
+      value: educationLabelMap[patient.education],
     },
     {
-      label: "Skrining Terakhir",
-      value: patient.lastScreeningDate,
+      label: "Pekerjaan",
+      value: patient.occupation,
+    },
+    {
+      label: "Ras",
+      value: patient.race,
+    },
+    {
+      label: "Terdaftar",
+      value: formatDateTime(patient.createdAt),
+    },
+    {
+      label: "Terakhir Diperbarui",
+      value: formatDateTime(patient.updatedAt),
     },
   ];
 
   return (
     <Card>
       <CardHeader>
-        <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
-          <div>
-            <CardTitle>{patient.fullName}</CardTitle>
-            <CardDescription>
-              Detail identitas pasien dan status risiko terakhir.
-            </CardDescription>
-          </div>
+        <CardTitle>{patient.fullName}</CardTitle>
 
-          <RiskBadge risk={patient.riskCategory} />
-        </div>
+        <CardDescription>
+          Data demografi dan identitas pasien bersalin.
+        </CardDescription>
       </CardHeader>
 
       <CardContent>
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+        <dl className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
           {profileItems.map((item) => (
             <div
               key={item.label}
               className="rounded-2xl border border-slate-200 bg-slate-50 p-4"
             >
-              <p className="text-sm text-slate-500">{item.label}</p>
-              <p className="mt-1 font-medium text-slate-900">{item.value}</p>
+              <dt className="text-sm text-slate-500">{item.label}</dt>
+
+              <dd className="mt-1 font-medium text-slate-900">{item.value}</dd>
             </div>
           ))}
-
-          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-            <p className="text-sm text-slate-500">Status Data</p>
-
-            <div className="mt-2">
-              <Badge variant="success">Aktif</Badge>
-            </div>
-          </div>
-        </div>
+        </dl>
       </CardContent>
     </Card>
   );

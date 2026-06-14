@@ -1,24 +1,27 @@
 import type { PatientListParams } from "@/api/patients.api";
+import { screeningHistoryMock } from "@/features/screenings/data/screening-history.mock";
+import type { ScreeningHistory } from "@/features/screenings/types/screening-history.type";
 import type { PaginatedResponse } from "@/types/api";
 
-import { patientsMock } from "@/features/patients/data/patients.mock";
-import type {
-  Patient,
-  PatientFormValues,
-} from "@/features/patients/types/patient.type";
-import { screeningHistoryMock } from "@/features/screenings/data/screening-history.mock";
-import { calculateAgeFromDateOfBirth } from "@/lib/date";
+import {
+  educationLabelMap,
+  religionLabelMap,
+} from "../constants/patient-options";
+import { patientsMock } from "../data/patients.mock";
+import type { Patient, PatientFormValues } from "../types/patient.type";
 
-const STORAGE_KEY = "maternity_patients_mock";
+const STORAGE_KEY = "maternity_patients_mock_v2";
 
-function delay(ms = 400) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
+function delay(milliseconds = 400) {
+  return new Promise<void>((resolve) => {
+    window.setTimeout(resolve, milliseconds);
+  });
 }
 
 function seedPatientsIfEmpty() {
-  const existing = localStorage.getItem(STORAGE_KEY);
+  const existingData = localStorage.getItem(STORAGE_KEY);
 
-  if (!existing) {
+  if (!existingData) {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(patientsMock));
   }
 }
@@ -26,12 +29,20 @@ function seedPatientsIfEmpty() {
 function readPatients(): Patient[] {
   seedPatientsIfEmpty();
 
-  const raw = localStorage.getItem(STORAGE_KEY);
+  const rawData = localStorage.getItem(STORAGE_KEY);
 
-  if (!raw) return [];
+  if (!rawData) {
+    return [];
+  }
 
   try {
-    return JSON.parse(raw) as Patient[];
+    const parsedData: unknown = JSON.parse(rawData);
+
+    if (!Array.isArray(parsedData)) {
+      return [];
+    }
+
+    return parsedData as Patient[];
   } catch {
     return [];
   }
@@ -41,6 +52,24 @@ function writePatients(patients: Patient[]) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(patients));
 }
 
+function matchesSearch(patient: Patient, search: string) {
+  if (!search) {
+    return true;
+  }
+
+  const searchableValues = [
+    patient.fullName,
+    patient.occupation,
+    patient.race,
+    patient.religion,
+    religionLabelMap[patient.religion],
+    patient.education,
+    educationLabelMap[patient.education],
+  ];
+
+  return searchableValues.some((value) => value.toLowerCase().includes(search));
+}
+
 export async function getPatientsMock(
   params?: PatientListParams,
 ): Promise<PaginatedResponse<Patient>> {
@@ -48,46 +77,41 @@ export async function getPatientsMock(
 
   const page = params?.page ?? 1;
   const pageSize = params?.pageSize ?? 5;
-  const search = params?.search?.toLowerCase() ?? "";
-  const risk = params?.risk ?? "all";
 
-  const patients = readPatients();
+  const search = params?.search?.trim().toLowerCase() ?? "";
 
-  const filteredPatients = patients.filter((patient) => {
-    const matchSearch =
-      !search ||
-      patient.fullName.toLowerCase().includes(search) ||
-      patient.nik.toLowerCase().includes(search);
-
-    const matchRisk = risk === "all" || patient.riskCategory === risk;
-
-    return matchSearch && matchRisk;
-  });
+  const filteredPatients = readPatients().filter((patient) =>
+    matchesSearch(patient, search),
+  );
 
   const count = filteredPatients.length;
-  const totalPages = Math.max(1, Math.ceil(count / pageSize));
-  const safePage = Math.min(page, totalPages);
 
-  const start = (safePage - 1) * pageSize;
-  const end = start + pageSize;
+  const totalPages = Math.max(1, Math.ceil(count / pageSize));
+
+  const currentPage = Math.min(Math.max(page, 1), totalPages);
+
+  const startIndex = (currentPage - 1) * pageSize;
+
+  const paginatedPatients = filteredPatients.slice(
+    startIndex,
+    startIndex + pageSize,
+  );
 
   return {
-    data: filteredPatients.slice(start, end),
+    data: paginatedPatients,
     pagination: {
       count,
-      currentPage: safePage,
+      currentPage,
       totalPages,
       pageSize,
     },
   };
 }
 
-export async function getPatientByIdMock(id: string) {
+export async function getPatientByIdMock(patientId: string) {
   await delay();
 
-  const patients = readPatients();
-
-  const patient = patients.find((item) => item.id === id);
+  const patient = readPatients().find((item) => item.id === patientId);
 
   if (!patient) {
     throw new Error("Data pasien tidak ditemukan.");
@@ -96,70 +120,96 @@ export async function getPatientByIdMock(id: string) {
   return patient;
 }
 
-export async function getPatientScreeningsMock(id: string) {
-  await delay();
-
-  return screeningHistoryMock.filter((item) => item.patientId === id);
-}
-
 export async function createPatientMock(values: PatientFormValues) {
   await delay();
 
-  const patients = readPatients();
+  if (!values.religion || !values.education) {
+    throw new Error("Agama dan pendidikan pasien wajib dipilih.");
+  }
 
-  const newPatient: Patient = {
+  const timestamp = new Date().toISOString();
+
+  const patient: Patient = {
     id: crypto.randomUUID(),
-    ...values,
-    age: calculateAgeFromDateOfBirth(values.dateOfBirth),
-    lastScreeningDate: "-",
-    riskCategory: "no_risk",
+    fullName: values.fullName.trim(),
+    dateOfBirth: values.dateOfBirth,
+    religion: values.religion,
+    education: values.education,
+    occupation: values.occupation.trim(),
+    race: values.race.trim(),
+    createdAt: timestamp,
+    updatedAt: timestamp,
   };
 
-  writePatients([newPatient, ...patients]);
+  const patients = readPatients();
 
-  return newPatient;
+  writePatients([patient, ...patients]);
+
+  return patient;
 }
 
-export async function updatePatientMock(id: string, values: PatientFormValues) {
+export async function updatePatientMock(
+  patientId: string,
+  values: PatientFormValues,
+) {
   await delay();
+
+  if (!values.religion || !values.education) {
+    throw new Error("Agama dan pendidikan pasien wajib dipilih.");
+  }
 
   const patients = readPatients();
 
-  const updatedPatients = patients.map((patient) =>
-    patient.id === id
-      ? {
-          ...patient,
-          ...values,
-          age: calculateAgeFromDateOfBirth(values.dateOfBirth),
-        }
-      : patient,
-  );
+  const existingPatient = patients.find((patient) => patient.id === patientId);
 
-  writePatients(updatedPatients);
-
-  const updatedPatient = updatedPatients.find((patient) => patient.id === id);
-
-  if (!updatedPatient) {
+  if (!existingPatient) {
     throw new Error("Data pasien tidak ditemukan.");
   }
+
+  const updatedPatient: Patient = {
+    ...existingPatient,
+    fullName: values.fullName.trim(),
+    dateOfBirth: values.dateOfBirth,
+    religion: values.religion,
+    education: values.education,
+    occupation: values.occupation.trim(),
+    race: values.race.trim(),
+    updatedAt: new Date().toISOString(),
+  };
+
+  writePatients(
+    patients.map((patient) =>
+      patient.id === patientId ? updatedPatient : patient,
+    ),
+  );
 
   return updatedPatient;
 }
 
-export async function deletePatientMock(id: string) {
+export async function deletePatientMock(patientId: string) {
   await delay();
 
   const patients = readPatients();
 
-  const exists = patients.some((patient) => patient.id === id);
+  const patientExists = patients.some((patient) => patient.id === patientId);
 
-  if (!exists) {
+  if (!patientExists) {
     throw new Error("Data pasien tidak ditemukan.");
   }
 
-  writePatients(patients.filter((patient) => patient.id !== id));
+  writePatients(patients.filter((patient) => patient.id !== patientId));
 
-  return id;
+  return patientId;
+}
+
+export async function getPatientScreeningsMock(
+  patientId: string,
+): Promise<ScreeningHistory[]> {
+  await delay();
+
+  return screeningHistoryMock.filter(
+    (history) => history.patientId === patientId,
+  );
 }
 
 export async function resetPatientsMock() {

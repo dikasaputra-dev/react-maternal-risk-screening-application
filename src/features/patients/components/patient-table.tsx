@@ -1,4 +1,7 @@
+import { Link } from "react-router-dom";
+
 import { Button } from "@/components/ui/button";
+import { EmptyState } from "@/components/ui/empty-state";
 import {
   Table,
   TableBody,
@@ -7,11 +10,14 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { EmptyState } from "@/components/ui/empty-state";
+import { calculateAgeFromDateOfBirth, formatDate } from "@/lib/date";
 
-import { RiskBadge } from "@/features/patients/components/risk-badge";
-import type { Patient } from "@/features/patients/types/patient.type";
-import { Link } from "react-router-dom";
+import {
+  educationLabelMap,
+  religionLabelMap,
+} from "../constants/patient-options";
+import { patientRoutes } from "../constants/patient-routes";
+import type { Patient } from "../types/patient.type";
 
 type PatientTableProps = {
   patients: Patient[];
@@ -32,7 +38,7 @@ export function PatientTable({
     return (
       <EmptyState
         title="Data pasien tidak ditemukan"
-        description="Coba ubah kata kunci pencarian atau filter risiko."
+        description="Belum ada pasien yang sesuai dengan kata kunci pencarian."
       />
     );
   }
@@ -41,12 +47,13 @@ export function PatientTable({
     <Table>
       <TableHeader>
         <TableRow>
-          <TableHead>Nama Pasien</TableHead>
-          <TableHead>NIK</TableHead>
+          <TableHead>Nama</TableHead>
+          <TableHead>Tanggal Lahir</TableHead>
           <TableHead>Usia</TableHead>
-          <TableHead>No. HP</TableHead>
-          <TableHead>Skrining Terakhir</TableHead>
-          <TableHead>Status Risiko</TableHead>
+          <TableHead>Agama</TableHead>
+          <TableHead>Pendidikan</TableHead>
+          <TableHead>Pekerjaan</TableHead>
+          <TableHead>Ras</TableHead>
           <TableHead className="text-right">Aksi</TableHead>
         </TableRow>
       </TableHeader>
@@ -58,25 +65,32 @@ export function PatientTable({
               {patient.fullName}
             </TableCell>
 
-            <TableCell>{patient.nik}</TableCell>
-            <TableCell>{patient.age} tahun</TableCell>
-            <TableCell>{patient.phone || "-"}</TableCell>
-            <TableCell>{patient.lastScreeningDate}</TableCell>
+            <TableCell>{formatDate(patient.dateOfBirth)}</TableCell>
 
             <TableCell>
-              <RiskBadge risk={patient.riskCategory} />
+              {calculateAgeFromDateOfBirth(patient.dateOfBirth)} tahun
             </TableCell>
+
+            <TableCell>{religionLabelMap[patient.religion]}</TableCell>
+
+            <TableCell>{educationLabelMap[patient.education]}</TableCell>
+
+            <TableCell>{patient.occupation}</TableCell>
+
+            <TableCell>{patient.race}</TableCell>
 
             <TableCell>
               <div className="flex justify-end gap-2">
-                <Link to={`/patients/${patient.id}`}>
-                  <Button variant="outline" size="sm">
-                    Detail
-                  </Button>
+                <Link
+                  to={patientRoutes.detail(patient.id)}
+                  className="inline-flex h-9 items-center justify-center rounded-xl border border-slate-300 bg-white px-3 text-sm font-medium text-slate-900 transition hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+                >
+                  Detail
                 </Link>
 
                 {canEdit && (
                   <Button
+                    type="button"
                     variant="ghost"
                     size="sm"
                     onClick={() => onEdit(patient)}
@@ -87,11 +101,12 @@ export function PatientTable({
 
                 {canDelete && (
                   <Button
+                    type="button"
                     variant="danger"
                     size="sm"
                     onClick={() => onDelete(patient.id)}
                   >
-                    Delete
+                    Hapus
                   </Button>
                 )}
               </div>

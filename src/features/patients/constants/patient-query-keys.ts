@@ -3,15 +3,56 @@ import type { PatientListParams } from "@/api/patients.api";
 export const patientQueryKeys = {
   all: ["patients"] as const,
 
-  lists: () => [...patientQueryKeys.all, "list"] as const,
+  lists() {
+    return [...patientQueryKeys.all, "list"] as const;
+  },
 
-  list: (params?: PatientListParams) =>
-    [...patientQueryKeys.lists(), params] as const,
+  list(params?: PatientListParams) {
+    return [...patientQueryKeys.lists(), params ?? {}] as const;
+  },
 
-  detail: (id: string) => [...patientQueryKeys.all, "detail", id] as const,
+  details() {
+    return [...patientQueryKeys.all, "detail"] as const;
+  },
 
-  screenings: (id: string) =>
-    [...patientQueryKeys.all, "screenings", id] as const,
+  detail(patientId: string) {
+    return [...patientQueryKeys.details(), patientId] as const;
+  },
+
+  workflow(patientId: string) {
+    return [...patientQueryKeys.detail(patientId), "workflow"] as const;
+  },
+
+  initialScreening(patientId: string) {
+    return [
+      ...patientQueryKeys.detail(patientId),
+      "initial-screening",
+    ] as const;
+  },
+
+  laborMonitoring(patientId: string) {
+    return [...patientQueryKeys.detail(patientId), "labor-monitoring"] as const;
+  },
+
+  clinicalActions(patientId: string) {
+    return [...patientQueryKeys.detail(patientId), "clinical-actions"] as const;
+  },
+
+  deliveryOutcome(patientId: string) {
+    return [...patientQueryKeys.detail(patientId), "delivery-outcome"] as const;
+  },
+
+  newbornOutcome(patientId: string) {
+    return [...patientQueryKeys.detail(patientId), "newborn-outcome"] as const;
+  },
+
+  /**
+   * Legacy query key.
+   *
+   * Dipertahankan sementara karena halaman detail pasien lama masih
+   * menggunakannya. Akan dibersihkan setelah migrasi workflow selesai.
+   */
+  screenings(patientId: string) {
+    return [...patientQueryKeys.detail(patientId), "screenings"] as const;
+  },
 };
-
-
