@@ -1,17 +1,17 @@
 import { useQuery } from "@tanstack/react-query";
 
-import { getLaborMonitoringEntries } from "@/api/labor-monitoring.api";
+import { getNewbornOutcome } from "@/api/newborn-outcome.api";
 import { env } from "@/config/env";
 import { patientQueryKeys } from "@/features/patients/constants/patient-query-keys";
 
-import { getLaborMonitoringEntriesMock } from "../api/labor-monitoring-mock-api";
+import { getNewbornOutcomeMock } from "../api/newborn-outcome-mock-api";
 
-export function useLaborMonitoring(
+export function useNewbornOutcome(
   patientId: string | undefined,
   enabled = true,
 ) {
   return useQuery({
-    queryKey: patientQueryKeys.laborMonitoring(patientId ?? ""),
+    queryKey: patientQueryKeys.newbornOutcome(patientId ?? ""),
 
     queryFn: () => {
       if (!patientId) {
@@ -19,14 +19,14 @@ export function useLaborMonitoring(
       }
 
       if (env.mock.screenings) {
-        return getLaborMonitoringEntriesMock(patientId);
+        return getNewbornOutcomeMock(patientId);
       }
 
-      return getLaborMonitoringEntries(patientId);
+      return getNewbornOutcome(patientId);
     },
 
     enabled: Boolean(patientId) && enabled,
 
-    staleTime: 15_000,
+    staleTime: 30_000,
   });
 }
