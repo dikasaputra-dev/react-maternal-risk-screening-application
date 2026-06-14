@@ -6,7 +6,9 @@ import {
   mapPatientDtosToPatients,
   mapPatientFormToPayload,
 } from "@/features/patients/mappers/patient.mapper";
+import { mapPatientWorkflowStatusDto } from "@/features/patients/mappers/patient-workflow.mapper";
 import type { PatientDto } from "@/features/patients/types/patient.dto";
+import type { PatientWorkflowStatusDto } from "@/features/patients/types/patient-workflow.dto";
 import type {
   Patient,
   PatientFormValues,
@@ -80,6 +82,16 @@ export async function deletePatient(patientId: string) {
   await apiClient.delete(`/api/patients/${patientId}/`);
 
   return patientId;
+}
+
+export async function getPatientWorkflowStatus(patientId: string) {
+  const response = await apiClient.get(
+    `/api/patients/${patientId}/workflow-status/`,
+  );
+
+  const dto = unwrapApiData<PatientWorkflowStatusDto>(response.data);
+
+  return mapPatientWorkflowStatusDto(dto);
 }
 
 export async function getPatientScreenings(patientId: string) {

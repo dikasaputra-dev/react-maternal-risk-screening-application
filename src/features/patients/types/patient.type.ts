@@ -1,3 +1,10 @@
+import type {
+  PatientRiskSummary,
+  RiskCategory,
+} from "@/features/clinical-risk/types/risk.type";
+
+export type { RiskCategory } from "@/features/clinical-risk/types/risk.type";
+
 export type Religion =
   | "islam"
   | "protestant"
@@ -19,14 +26,6 @@ export type EducationLevel =
   | "doctorate"
   | "other";
 
-/**
- * Type lama yang masih dipertahankan sementara untuk kompatibilitas
- * file lama seperti risk-badge.tsx.
- *
- * Entity Patient baru sudah tidak menggunakan riskCategory.
- */
-export type RiskCategory = "no_risk" | "low_risk" | "high_risk";
-
 export type Patient = {
   id: string;
   fullName: string;
@@ -35,6 +34,15 @@ export type Patient = {
   education: EducationLevel;
   occupation: string;
   race: string;
+
+  /**
+   * Ringkasan risiko terbaru.
+   *
+   * Null berarti pasien belum memiliki hasil skrining
+   * atau pemantauan persalinan.
+   */
+  latestRisk: PatientRiskSummary | null;
+
   createdAt: string;
   updatedAt: string;
 };
@@ -52,10 +60,12 @@ export type PatientFormErrors = Partial<
   Record<keyof PatientFormValues, string>
 >;
 
-/**
- * Alias sementara agar file yang sebelumnya menggunakan nama
- * PatientRegistrationFormValues tidak langsung rusak.
- */
 export type PatientRegistrationFormValues = PatientFormValues;
 
 export type PatientRegistrationFormErrors = PatientFormErrors;
+
+/**
+ * Alias ini dipertahankan agar import lama terhadap
+ * RiskCategory dari patient.type.ts tetap berfungsi.
+ */
+export type PatientRiskCategory = RiskCategory;

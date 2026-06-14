@@ -1,5 +1,22 @@
-import type { PatientDto, PatientPayloadDto } from "../types/patient.dto";
+import type {
+  PatientDto,
+  PatientPayloadDto,
+  PatientRiskSummaryDto,
+} from "../types/patient.dto";
 import type { Patient, PatientFormValues } from "../types/patient.type";
+
+function mapPatientRiskSummaryDto(dto?: PatientRiskSummaryDto | null) {
+  if (!dto) {
+    return null;
+  }
+
+  return {
+    score: dto.score,
+    category: dto.category,
+    source: dto.source,
+    assessedAt: dto.assessed_at,
+  };
+}
 
 export function mapPatientDtoToPatient(dto: PatientDto): Patient {
   return {
@@ -10,6 +27,7 @@ export function mapPatientDtoToPatient(dto: PatientDto): Patient {
     education: dto.education,
     occupation: dto.occupation,
     race: dto.race,
+    latestRisk: mapPatientRiskSummaryDto(dto.latest_risk),
     createdAt: dto.created_at,
     updatedAt: dto.updated_at,
   };
