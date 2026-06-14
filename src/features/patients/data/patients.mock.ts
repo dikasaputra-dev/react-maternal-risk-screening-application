@@ -1,4 +1,24 @@
+import type {
+  PatientRiskSummary,
+  RiskCategory,
+  RiskSource,
+} from "@/features/clinical-risk/types/risk.type";
+
 import type { Patient } from "../types/patient.type";
+
+function createRiskSummary(
+  score: number,
+  category: RiskCategory,
+  source: RiskSource,
+  assessedAt: string,
+): PatientRiskSummary {
+  return {
+    score,
+    category,
+    source,
+    assessedAt,
+  };
+}
 
 export const patientsMock: Patient[] = [
   {
@@ -9,6 +29,7 @@ export const patientsMock: Patient[] = [
     education: "senior_high_school",
     occupation: "Ibu Rumah Tangga",
     race: "Sunda",
+    latestRisk: null,
     createdAt: "2026-06-01T08:00:00.000Z",
     updatedAt: "2026-06-01T08:00:00.000Z",
   },
@@ -20,8 +41,14 @@ export const patientsMock: Patient[] = [
     education: "diploma",
     occupation: "Perawat",
     race: "Jawa",
+    latestRisk: createRiskSummary(
+      24,
+      "low_risk",
+      "initial_screening",
+      "2026-06-14T09:15:00.000Z",
+    ),
     createdAt: "2026-06-02T08:15:00.000Z",
-    updatedAt: "2026-06-02T08:15:00.000Z",
+    updatedAt: "2026-06-14T09:15:00.000Z",
   },
   {
     id: "3",
@@ -31,8 +58,14 @@ export const patientsMock: Patient[] = [
     education: "bachelor",
     occupation: "Guru",
     race: "Sunda",
+    latestRisk: createRiskSummary(
+      52,
+      "moderate_risk",
+      "labor_monitoring",
+      "2026-06-14T11:30:00.000Z",
+    ),
     createdAt: "2026-06-03T09:00:00.000Z",
-    updatedAt: "2026-06-03T09:00:00.000Z",
+    updatedAt: "2026-06-14T11:30:00.000Z",
   },
   {
     id: "4",
@@ -42,8 +75,14 @@ export const patientsMock: Patient[] = [
     education: "senior_high_school",
     occupation: "Karyawan Swasta",
     race: "Batak",
+    latestRisk: createRiskSummary(
+      77,
+      "high_risk",
+      "labor_monitoring",
+      "2026-06-14T12:45:00.000Z",
+    ),
     createdAt: "2026-06-04T10:30:00.000Z",
-    updatedAt: "2026-06-04T10:30:00.000Z",
+    updatedAt: "2026-06-14T12:45:00.000Z",
   },
   {
     id: "5",
@@ -53,8 +92,14 @@ export const patientsMock: Patient[] = [
     education: "junior_high_school",
     occupation: "Pedagang",
     race: "Sunda",
+    latestRisk: createRiskSummary(
+      38,
+      "moderate_risk",
+      "initial_screening",
+      "2026-06-13T10:20:00.000Z",
+    ),
     createdAt: "2026-06-05T07:45:00.000Z",
-    updatedAt: "2026-06-05T07:45:00.000Z",
+    updatedAt: "2026-06-13T10:20:00.000Z",
   },
   {
     id: "6",
@@ -64,6 +109,7 @@ export const patientsMock: Patient[] = [
     education: "senior_high_school",
     occupation: "Karyawan Toko",
     race: "Jawa",
+    latestRisk: null,
     createdAt: "2026-06-06T11:00:00.000Z",
     updatedAt: "2026-06-06T11:00:00.000Z",
   },
@@ -75,8 +121,14 @@ export const patientsMock: Patient[] = [
     education: "bachelor",
     occupation: "Pegawai Negeri",
     race: "Minangkabau",
+    latestRisk: createRiskSummary(
+      18,
+      "low_risk",
+      "labor_monitoring",
+      "2026-06-14T07:30:00.000Z",
+    ),
     createdAt: "2026-06-07T13:20:00.000Z",
-    updatedAt: "2026-06-07T13:20:00.000Z",
+    updatedAt: "2026-06-14T07:30:00.000Z",
   },
   {
     id: "8",
@@ -86,8 +138,14 @@ export const patientsMock: Patient[] = [
     education: "diploma",
     occupation: "Wiraswasta",
     race: "Bali",
+    latestRisk: createRiskSummary(
+      83,
+      "high_risk",
+      "initial_screening",
+      "2026-06-12T14:00:00.000Z",
+    ),
     createdAt: "2026-06-08T09:40:00.000Z",
-    updatedAt: "2026-06-08T09:40:00.000Z",
+    updatedAt: "2026-06-12T14:00:00.000Z",
   },
   {
     id: "9",
@@ -97,8 +155,14 @@ export const patientsMock: Patient[] = [
     education: "bachelor",
     occupation: "Apoteker",
     race: "Sunda",
+    latestRisk: createRiskSummary(
+      31,
+      "moderate_risk",
+      "labor_monitoring",
+      "2026-06-14T06:50:00.000Z",
+    ),
     createdAt: "2026-06-09T14:10:00.000Z",
-    updatedAt: "2026-06-09T14:10:00.000Z",
+    updatedAt: "2026-06-14T06:50:00.000Z",
   },
   {
     id: "10",
@@ -108,6 +172,7 @@ export const patientsMock: Patient[] = [
     education: "senior_high_school",
     occupation: "Penjahit",
     race: "Jawa",
+    latestRisk: null,
     createdAt: "2026-06-10T08:35:00.000Z",
     updatedAt: "2026-06-10T08:35:00.000Z",
   },
@@ -119,8 +184,14 @@ export const patientsMock: Patient[] = [
     education: "diploma",
     occupation: "Pemilik Toko",
     race: "Tionghoa",
+    latestRisk: createRiskSummary(
+      69,
+      "high_risk",
+      "labor_monitoring",
+      "2026-06-14T05:45:00.000Z",
+    ),
     createdAt: "2026-06-11T12:00:00.000Z",
-    updatedAt: "2026-06-11T12:00:00.000Z",
+    updatedAt: "2026-06-14T05:45:00.000Z",
   },
   {
     id: "12",
@@ -130,7 +201,13 @@ export const patientsMock: Patient[] = [
     education: "senior_high_school",
     occupation: "Mahasiswa",
     race: "Sunda",
+    latestRisk: createRiskSummary(
+      21,
+      "low_risk",
+      "initial_screening",
+      "2026-06-13T15:25:00.000Z",
+    ),
     createdAt: "2026-06-12T15:25:00.000Z",
-    updatedAt: "2026-06-12T15:25:00.000Z",
+    updatedAt: "2026-06-13T15:25:00.000Z",
   },
 ];

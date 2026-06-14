@@ -5,6 +5,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { RiskBadge } from "@/features/clinical-risk/components/risk-badge";
+import { riskSourceLabelMap } from "@/features/clinical-risk/constants/risk-config";
 import {
   calculateAgeFromDateOfBirth,
   formatDate,
@@ -60,11 +62,21 @@ export function PatientProfileCard({ patient }: PatientProfileCardProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>{patient.fullName}</CardTitle>
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+          <div>
+            <CardTitle>{patient.fullName}</CardTitle>
 
-        <CardDescription>
-          Data demografi dan identitas pasien bersalin.
-        </CardDescription>
+            <CardDescription>
+              Data demografi, identitas, dan ringkasan risiko terbaru pasien.
+            </CardDescription>
+          </div>
+
+          <RiskBadge
+            category={patient.latestRisk?.category}
+            score={patient.latestRisk?.score}
+            showScore
+          />
+        </div>
       </CardHeader>
 
       <CardContent>
@@ -79,6 +91,30 @@ export function PatientProfileCard({ patient }: PatientProfileCardProps) {
               <dd className="mt-1 font-medium text-slate-900">{item.value}</dd>
             </div>
           ))}
+
+          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 md:col-span-2">
+            <dt className="text-sm text-slate-500">
+              Sumber Penilaian Risiko Terakhir
+            </dt>
+
+            <dd className="mt-2">
+              {patient.latestRisk ? (
+                <div className="space-y-1">
+                  <p className="font-medium text-slate-900">
+                    {riskSourceLabelMap[patient.latestRisk.source]}
+                  </p>
+
+                  <p className="text-sm text-slate-500">
+                    Dinilai pada {formatDateTime(patient.latestRisk.assessedAt)}
+                  </p>
+                </div>
+              ) : (
+                <p className="text-sm text-slate-500">
+                  Pasien belum menjalani penilaian risiko.
+                </p>
+              )}
+            </dd>
+          </div>
         </dl>
       </CardContent>
     </Card>
