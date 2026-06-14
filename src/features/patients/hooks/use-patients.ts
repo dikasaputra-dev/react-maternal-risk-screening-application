@@ -1,13 +1,15 @@
 import { useQuery } from "@tanstack/react-query";
 
 import { getPatients, type PatientListParams } from "@/api/patients.api";
-import { patientQueryKeys } from "@/features/patients/constants/patient-query-keys";
-import { getPatientsMock } from "@/features/patients/api/patient-mock-api";
 import { env } from "@/config/env";
+
+import { getPatientsMock } from "../api/patient-mock-api";
+import { patientQueryKeys } from "../constants/patient-query-keys";
 
 export function usePatients(params?: PatientListParams) {
   return useQuery({
     queryKey: patientQueryKeys.list(params),
+
     queryFn: () => {
       if (env.mock.patients) {
         return getPatientsMock(params);
@@ -15,5 +17,7 @@ export function usePatients(params?: PatientListParams) {
 
       return getPatients(params);
     },
+
+    staleTime: 15_000,
   });
 }

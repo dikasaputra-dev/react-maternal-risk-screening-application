@@ -20,7 +20,10 @@ function seedWorkflowStorage() {
   }
 }
 
-function readWorkflowStorage(): Record<string, PatientWorkflowStatus> {
+export function readPatientWorkflowMockStorage(): Record<
+  string,
+  PatientWorkflowStatus
+> {
   seedWorkflowStorage();
 
   const rawData = localStorage.getItem(STORAGE_KEY);
@@ -53,7 +56,7 @@ function writeWorkflowStorage(
 }
 
 export function ensurePatientWorkflowMock(patientId: string) {
-  const workflows = readWorkflowStorage();
+  const workflows = readPatientWorkflowMockStorage();
 
   const existingWorkflow = workflows[patientId];
 
@@ -76,16 +79,20 @@ export function completeInitialScreeningWorkflowMock(
   initialScreeningId: string,
   completedAt: string,
 ) {
-  const workflows = readWorkflowStorage();
+  const workflows = readPatientWorkflowMockStorage();
 
   const currentWorkflow =
     workflows[patientId] ?? createDefaultPatientWorkflow(patientId);
 
   const updatedWorkflow: PatientWorkflowStatus = {
     ...currentWorkflow,
+
     hasInitialScreening: true,
+
     initialScreeningId,
+
     initialScreeningCompletedAt: completedAt,
+
     updatedAt: completedAt,
   };
 
@@ -102,14 +109,16 @@ export function setLaborMonitoringCountWorkflowMock(
   monitoringEntryCount: number,
   updatedAt: string,
 ) {
-  const workflows = readWorkflowStorage();
+  const workflows = readPatientWorkflowMockStorage();
 
   const currentWorkflow =
     workflows[patientId] ?? createDefaultPatientWorkflow(patientId);
 
   const updatedWorkflow: PatientWorkflowStatus = {
     ...currentWorkflow,
+
     monitoringEntryCount,
+
     updatedAt,
   };
 
@@ -126,14 +135,16 @@ export function setClinicalActionCountWorkflowMock(
   clinicalActionCount: number,
   updatedAt: string,
 ) {
-  const workflows = readWorkflowStorage();
+  const workflows = readPatientWorkflowMockStorage();
 
   const currentWorkflow =
     workflows[patientId] ?? createDefaultPatientWorkflow(patientId);
 
   const updatedWorkflow: PatientWorkflowStatus = {
     ...currentWorkflow,
+
     clinicalActionCount,
+
     updatedAt,
   };
 
@@ -149,14 +160,16 @@ export function completeDeliveryOutcomeWorkflowMock(
   patientId: string,
   completedAt: string,
 ) {
-  const workflows = readWorkflowStorage();
+  const workflows = readPatientWorkflowMockStorage();
 
   const currentWorkflow =
     workflows[patientId] ?? createDefaultPatientWorkflow(patientId);
 
   const updatedWorkflow: PatientWorkflowStatus = {
     ...currentWorkflow,
+
     hasDeliveryOutcome: true,
+
     updatedAt: completedAt,
   };
 
@@ -172,14 +185,16 @@ export function completeNewbornOutcomeWorkflowMock(
   patientId: string,
   completedAt: string,
 ) {
-  const workflows = readWorkflowStorage();
+  const workflows = readPatientWorkflowMockStorage();
 
   const currentWorkflow =
     workflows[patientId] ?? createDefaultPatientWorkflow(patientId);
 
   const updatedWorkflow: PatientWorkflowStatus = {
     ...currentWorkflow,
+
     hasNewbornOutcome: true,
+
     updatedAt: completedAt,
   };
 
@@ -192,7 +207,7 @@ export function completeNewbornOutcomeWorkflowMock(
 }
 
 export function removePatientWorkflowMock(patientId: string) {
-  const workflows = readWorkflowStorage();
+  const workflows = readPatientWorkflowMockStorage();
 
   const { [patientId]: removedWorkflow, ...remainingWorkflows } = workflows;
 

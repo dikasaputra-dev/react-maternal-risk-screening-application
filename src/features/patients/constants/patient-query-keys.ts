@@ -45,14 +45,4 @@ export const patientQueryKeys = {
   newbornOutcome(patientId: string) {
     return [...patientQueryKeys.detail(patientId), "newborn-outcome"] as const;
   },
-
-  /**
-   * Legacy query key.
-   *
-   * Dipertahankan sementara karena halaman detail pasien lama masih
-   * menggunakannya. Akan dibersihkan setelah migrasi workflow selesai.
-   */
-  screenings(patientId: string) {
-    return [...patientQueryKeys.detail(patientId), "screenings"] as const;
-  },
 };

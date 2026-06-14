@@ -5,6 +5,7 @@ import { resetDeliveryOutcomeMockStorage } from "@/features/delivery-outcomes/ap
 import { resetInitialScreeningMockStorage } from "@/features/initial-screening/api/initial-screening-mock-api";
 import { resetLaborMonitoringMockStorage } from "@/features/labor-monitoring/api/labor-monitoring-mock-api";
 import { resetNewbornOutcomeMockStorage } from "@/features/newborn-outcomes/api/newborn-outcome-mock-api";
+import { patientJourneyStatusConfig } from "@/features/patient-journey/constants/patient-journey-config";
 import { screeningHistoryMock } from "@/features/screenings/data/screening-history.mock";
 import type { ScreeningHistory } from "@/features/screenings/types/screening-history.type";
 import type { PaginatedResponse } from "@/types/api";
@@ -17,6 +18,7 @@ import {
 } from "./patient-mock-storage";
 import {
   ensurePatientWorkflowMock,
+  readPatientWorkflowMockStorage,
   removePatientWorkflowMock,
   resetPatientWorkflowMockStorage,
 } from "./patient-workflow-mock-api";
@@ -24,8 +26,11 @@ import {
   educationLabelMap,
   religionLabelMap,
 } from "../constants/patient-options";
+import { createDefaultPatientWorkflow } from "../data/patient-workflow.mock";
 import { patientsMock } from "../data/patients.mock";
+import type { PatientListItem } from "../types/patient-list.type";
 import type { Patient, PatientFormValues } from "../types/patient.type";
+import { buildPatientListItem } from "../utils/patient-list";
 
 function delay(milliseconds = 400) {
   return new Promise<void>((resolve) => {
@@ -33,7 +38,20 @@ function delay(milliseconds = 400) {
   });
 }
 
-function matchesSearch(patient: Patient, search: string) {
+function buildPatientListItems() {
+  const patients = readPatientsMockStorage();
+
+  const workflows = readPatientWorkflowMockStorage();
+
+  return patients.map((patient) => {
+    const workflow =
+      workflows[patient.id] ?? createDefaultPatientWorkflow(patient.id);
+
+    return buildPatientListItem(patient, workflow);
+  });
+}
+
+function matchesSearch(patient: PatientListItem, search: string) {
   if (!search) {
     return true;
   }
@@ -41,6 +59,8 @@ function matchesSearch(patient: Patient, search: string) {
   const riskLabel = patient.latestRisk
     ? riskCategoryConfig[patient.latestRisk.category].label
     : "Belum Dinilai";
+
+  const journeyLabel = patientJourneyStatusConfig[patient.journey.status].label;
 
   const searchableValues = [
     patient.fullName,
@@ -51,14 +71,41 @@ function matchesSearch(patient: Patient, search: string) {
     patient.education,
     educationLabelMap[patient.education],
     riskLabel,
+    journeyLabel,
   ];
 
   return searchableValues.some((value) => value.toLowerCase().includes(search));
 }
 
+function matchesJourneyStatus(
+  patient: PatientListItem,
+  params?: PatientListParams,
+) {
+  if (!params?.journeyStatus) {
+    return true;
+  }
+
+  return patient.journey.status === params.journeyStatus;
+}
+
+function matchesRiskCategory(
+  patient: PatientListItem,
+  params?: PatientListParams,
+) {
+  if (!params?.riskCategory) {
+    return true;
+  }
+
+  if (params.riskCategory === "unassessed") {
+    return patient.latestRisk === null;
+  }
+
+  return patient.latestRisk?.category === params.riskCategory;
+}
+
 export async function getPatientsMock(
   params?: PatientListParams,
-): Promise<PaginatedResponse<Patient>> {
+): Promise<PaginatedResponse<PatientListItem>> {
   await delay();
 
   const page = params?.page ?? 1;
@@ -67,8 +114,11 @@ export async function getPatientsMock(
 
   const search = params?.search?.trim().toLowerCase() ?? "";
 
-  const filteredPatients = readPatientsMockStorage().filter((patient) =>
-    matchesSearch(patient, search),
+  const filteredPatients = buildPatientListItems().filter(
+    (patient) =>
+      matchesSearch(patient, search) &&
+      matchesJourneyStatus(patient, params) &&
+      matchesRiskCategory(patient, params),
   );
 
   const count = filteredPatients.length;

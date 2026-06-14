@@ -3,16 +3,22 @@ import { apiClient } from "./client";
 import { normalizePaginatedResponse, unwrapApiData } from "@/lib/api-response";
 import {
   mapPatientDtoToPatient,
-  mapPatientDtosToPatients,
+  mapPatientListItemDtosToPatientListItems,
   mapPatientFormToPayload,
 } from "@/features/patients/mappers/patient.mapper";
-import { mapPatientWorkflowStatusDto } from "@/features/patients/mappers/patient-workflow.mapper";
 import type { PatientDto } from "@/features/patients/types/patient.dto";
+import type { PatientListItemDto } from "@/features/patients/types/patient-list.dto";
+import type {
+  PatientListItem,
+  PatientRiskFilter,
+  PatientStatusFilter,
+} from "@/features/patients/types/patient-list.type";
 import type { PatientWorkflowStatusDto } from "@/features/patients/types/patient-workflow.dto";
 import type {
   Patient,
   PatientFormValues,
 } from "@/features/patients/types/patient.type";
+import { mapPatientWorkflowStatusDto } from "@/features/patients/mappers/patient-workflow.mapper";
 import type { ScreeningHistory } from "@/features/screenings/types/screening-history.type";
 import type { PaginatedResponse } from "@/types/api";
 
@@ -20,27 +26,38 @@ export type PatientListParams = {
   search?: string;
   page?: number;
   pageSize?: number;
+
+  journeyStatus?: Exclude<PatientStatusFilter, "all">;
+
+  riskCategory?: Exclude<PatientRiskFilter, "all">;
 };
 
 export async function getPatients(
   params?: PatientListParams,
-): Promise<PaginatedResponse<Patient>> {
+): Promise<PaginatedResponse<PatientListItem>> {
   const response = await apiClient.get("/api/patients/", {
     params: {
       search: params?.search || undefined,
+
       page: params?.page,
+
       page_size: params?.pageSize,
+
+      journey_status: params?.journeyStatus,
+
+      risk_category: params?.riskCategory,
     },
   });
 
-  const normalizedResponse = normalizePaginatedResponse<PatientDto>(
+  const normalizedResponse = normalizePaginatedResponse<PatientListItemDto>(
     response.data,
     params?.page,
     params?.pageSize,
   );
 
   return {
-    data: mapPatientDtosToPatients(normalizedResponse.data),
+    data: mapPatientListItemDtosToPatientListItems(normalizedResponse.data),
+
     pagination: normalizedResponse.pagination,
   };
 }
