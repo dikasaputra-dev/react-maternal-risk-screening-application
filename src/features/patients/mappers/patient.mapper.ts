@@ -1,11 +1,23 @@
+import type { PatientRiskSummary } from "@/features/clinical-risk/types/risk.type";
+
 import type {
   PatientDto,
   PatientPayloadDto,
   PatientRiskSummaryDto,
 } from "../types/patient.dto";
+import type {
+  PatientJourneyListSummaryDto,
+  PatientListItemDto,
+} from "../types/patient-list.dto";
+import type {
+  PatientJourneyListSummary,
+  PatientListItem,
+} from "../types/patient-list.type";
 import type { Patient, PatientFormValues } from "../types/patient.type";
 
-function mapPatientRiskSummaryDto(dto?: PatientRiskSummaryDto | null) {
+function mapPatientRiskSummaryDto(
+  dto?: PatientRiskSummaryDto | null,
+): PatientRiskSummary | null {
   if (!dto) {
     return null;
   }
@@ -18,6 +30,30 @@ function mapPatientRiskSummaryDto(dto?: PatientRiskSummaryDto | null) {
   };
 }
 
+function mapPatientJourneyListSummaryDto(
+  dto: PatientJourneyListSummaryDto,
+): PatientJourneyListSummary {
+  return {
+    status: dto.status,
+
+    documentedMilestones: dto.documented_milestones,
+
+    totalMilestones: dto.total_milestones,
+
+    completionPercentage: dto.completion_percentage,
+
+    monitoringEntryCount: dto.monitoring_entry_count,
+
+    clinicalActionCount: dto.clinical_action_count,
+
+    hasInitialScreening: dto.has_initial_screening,
+
+    hasDeliveryOutcome: dto.has_delivery_outcome,
+
+    hasNewbornOutcome: dto.has_newborn_outcome,
+  };
+}
+
 export function mapPatientDtoToPatient(dto: PatientDto): Patient {
   return {
     id: dto.id,
@@ -27,7 +63,9 @@ export function mapPatientDtoToPatient(dto: PatientDto): Patient {
     education: dto.education,
     occupation: dto.occupation,
     race: dto.race,
+
     latestRisk: mapPatientRiskSummaryDto(dto.latest_risk),
+
     createdAt: dto.created_at,
     updatedAt: dto.updated_at,
   };
@@ -35,6 +73,22 @@ export function mapPatientDtoToPatient(dto: PatientDto): Patient {
 
 export function mapPatientDtosToPatients(dtos: PatientDto[]) {
   return dtos.map(mapPatientDtoToPatient);
+}
+
+export function mapPatientListItemDtoToPatientListItem(
+  dto: PatientListItemDto,
+): PatientListItem {
+  return {
+    ...mapPatientDtoToPatient(dto),
+
+    journey: mapPatientJourneyListSummaryDto(dto.journey_summary),
+  };
+}
+
+export function mapPatientListItemDtosToPatientListItems(
+  dtos: PatientListItemDto[],
+) {
+  return dtos.map(mapPatientListItemDtoToPatientListItem);
 }
 
 export function mapPatientFormToPayload(
@@ -50,10 +104,15 @@ export function mapPatientFormToPayload(
 
   return {
     full_name: values.fullName.trim(),
+
     date_of_birth: values.dateOfBirth,
+
     religion: values.religion,
+
     education: values.education,
+
     occupation: values.occupation.trim(),
+
     race: values.race.trim(),
   };
 }
