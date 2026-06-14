@@ -6,7 +6,10 @@ import { patientQueryKeys } from "@/features/patients/constants/patient-query-ke
 
 import { getClinicalActionsMock } from "../api/clinical-actions-mock-api";
 
-export function useClinicalActions(patientId: string | undefined) {
+export function useClinicalActions(
+  patientId: string | undefined,
+  enabled = true,
+) {
   return useQuery({
     queryKey: patientQueryKeys.clinicalActions(patientId ?? ""),
 
@@ -22,7 +25,7 @@ export function useClinicalActions(patientId: string | undefined) {
       return getClinicalActions(patientId);
     },
 
-    enabled: Boolean(patientId),
+    enabled: Boolean(patientId) && enabled,
 
     staleTime: 15_000,
   });

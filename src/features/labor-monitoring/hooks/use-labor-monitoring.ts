@@ -6,7 +6,10 @@ import { patientQueryKeys } from "@/features/patients/constants/patient-query-ke
 
 import { getLaborMonitoringEntriesMock } from "../api/labor-monitoring-mock-api";
 
-export function useLaborMonitoring(patientId: string | undefined) {
+export function useLaborMonitoring(
+  patientId: string | undefined,
+  enabled = true,
+) {
   return useQuery({
     queryKey: patientQueryKeys.laborMonitoring(patientId ?? ""),
 
@@ -22,7 +25,7 @@ export function useLaborMonitoring(patientId: string | undefined) {
       return getLaborMonitoringEntries(patientId);
     },
 
-    enabled: Boolean(patientId),
+    enabled: Boolean(patientId) && enabled,
 
     staleTime: 15_000,
   });

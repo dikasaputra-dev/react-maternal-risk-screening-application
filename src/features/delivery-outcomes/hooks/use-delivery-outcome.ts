@@ -6,7 +6,10 @@ import { patientQueryKeys } from "@/features/patients/constants/patient-query-ke
 
 import { getDeliveryOutcomeMock } from "../api/delivery-outcome-mock-api";
 
-export function useDeliveryOutcome(patientId: string | undefined) {
+export function useDeliveryOutcome(
+  patientId: string | undefined,
+  enabled = true,
+) {
   return useQuery({
     queryKey: patientQueryKeys.deliveryOutcome(patientId ?? ""),
 
@@ -22,7 +25,7 @@ export function useDeliveryOutcome(patientId: string | undefined) {
       return getDeliveryOutcome(patientId);
     },
 
-    enabled: Boolean(patientId),
+    enabled: Boolean(patientId) && enabled,
 
     staleTime: 30_000,
   });
