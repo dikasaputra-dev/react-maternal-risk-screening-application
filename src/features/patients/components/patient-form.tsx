@@ -1,17 +1,21 @@
-import React, { useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Select } from "@/components/ui/select";
+import { getTodayDateInputValue } from "@/lib/date";
 
-import type {
-  Patient,
-  PatientFormErrors,
-  PatientFormValues,
-} from "@/features/patients/types/patient.type";
+import {
+  educationOptions,
+  religionOptions,
+} from "../constants/patient-options";
+import type { Patient, PatientFormValues } from "../types/patient.type";
 import {
   hasPatientFormErrors,
   validatePatientForm,
-} from "@/features/patients/utils/patient-validation";
+} from "../utils/patient-validation";
+
+type TouchedFields = Partial<Record<keyof PatientFormValues, boolean>>;
 
 type PatientFormProps = {
   initialData?: Patient | null;
@@ -20,109 +24,158 @@ type PatientFormProps = {
   isSubmitting?: boolean;
 };
 
+function createInitialFormValues(
+  initialData?: Patient | null,
+): PatientFormValues {
+  return {
+    fullName: initialData?.fullName ?? "",
+    dateOfBirth: initialData?.dateOfBirth ?? "",
+    religion: initialData?.religion ?? "",
+    education: initialData?.education ?? "",
+    occupation: initialData?.occupation ?? "",
+    race: initialData?.race ?? "",
+  };
+}
+
 export function PatientForm({
   initialData,
   onSubmit,
   onCancel,
   isSubmitting = false,
 }: PatientFormProps) {
-  const [form, setForm] = useState<PatientFormValues>({
-    nik: initialData?.nik ?? "",
-    fullName: initialData?.fullName ?? "",
-    dateOfBirth: initialData?.dateOfBirth ?? "",
-    phone: initialData?.phone ?? "",
-    address: initialData?.address ?? "",
-  });
+  const [form, setForm] = useState<PatientFormValues>(() =>
+    createInitialFormValues(initialData),
+  );
 
-  const [errors, setErrors] = useState<PatientFormErrors>({});
-  const [isTouched, setIsTouched] = useState(false);
+  const [touchedFields, setTouchedFields] = useState<TouchedFields>({});
 
-  const liveErrors = useMemo(() => {
-    if (!isTouched) return {};
+  const errors = useMemo(() => validatePatientForm(form), [form]);
 
-    return validatePatientForm(form);
-  }, [form, isTouched]);
-
-  const visibleErrors = isTouched ? liveErrors : errors;
-  const isInvalid = hasPatientFormErrors(validatePatientForm(form));
+  const isInvalid = hasPatientFormErrors(errors);
 
   const handleChange = (field: keyof PatientFormValues, value: string) => {
-    setForm((prev) => ({
-      ...prev,
+    setForm((currentForm) => ({
+      ...currentForm,
       [field]: value,
     }));
+  };
 
-    setIsTouched(true);
+  const markFieldAsTouched = (field: keyof PatientFormValues) => {
+    setTouchedFields((currentFields) => ({
+      ...currentFields,
+      [field]: true,
+    }));
+  };
+
+  const getVisibleError = (field: keyof PatientFormValues) => {
+    return touchedFields[field] ? errors[field] : undefined;
+  };
+
+  const markAllFieldsAsTouched = () => {
+    setTouchedFields({
+      fullName: true,
+      dateOfBirth: true,
+      religion: true,
+      education: true,
+      occupation: true,
+      race: true,
+    });
   };
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
+    markAllFieldsAsTouched();
+
     const nextErrors = validatePatientForm(form);
 
-    setErrors(nextErrors);
-    setIsTouched(true);
-
-    if (hasPatientFormErrors(nextErrors)) return;
+    if (hasPatientFormErrors(nextErrors)) {
+      return;
+    }
 
     await onSubmit({
-      nik: form.nik.trim(),
       fullName: form.fullName.trim(),
       dateOfBirth: form.dateOfBirth,
-      phone: form.phone?.trim(),
-      address: form.address?.trim(),
+      religion: form.religion,
+      education: form.education,
+      occupation: form.occupation.trim(),
+      race: form.race.trim(),
     });
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <Input
-        id="nik"
-        label="NIK"
-        placeholder="Masukkan NIK 16 digit"
-        value={form.nik}
-        error={visibleErrors.nik}
-        onChange={(event) => handleChange("nik", event.target.value)}
-      />
-
+    <form onSubmit={handleSubmit} className="space-y-4" noValidate>
       <Input
         id="fullName"
-        label="Nama Lengkap"
-        placeholder="Masukkan nama pasien"
+        label="Nama"
+        placeholder="Masukkan nama lengkap pasien"
+        autoComplete="name"
         value={form.fullName}
-        error={visibleErrors.fullName}
+        error={getVisibleError("fullName")}
         onChange={(event) => handleChange("fullName", event.target.value)}
+        onBlur={() => markFieldAsTouched("fullName")}
       />
 
       <Input
         id="dateOfBirth"
         label="Tanggal Lahir"
         type="date"
+        max={getTodayDateInputValue()}
         value={form.dateOfBirth}
-        error={visibleErrors.dateOfBirth}
+        error={getVisibleError("dateOfBirth")}
         onChange={(event) => handleChange("dateOfBirth", event.target.value)}
+        onBlur={() => markFieldAsTouched("dateOfBirth")}
+      />
+
+      <Select
+        id="religion"
+        label="Agama"
+        placeholder="Pilih agama"
+        options={religionOptions}
+        value={form.religion}
+        error={getVisibleError("religion")}
+        onChange={(event) => handleChange("religion", event.target.value)}
+        onBlur={() => markFieldAsTouched("religion")}
+      />
+
+      <Select
+        id="education"
+        label="Pendidikan"
+        placeholder="Pilih pendidikan terakhir"
+        options={educationOptions}
+        value={form.education}
+        error={getVisibleError("education")}
+        onChange={(event) => handleChange("education", event.target.value)}
+        onBlur={() => markFieldAsTouched("education")}
       />
 
       <Input
-        id="phone"
-        label="No. HP"
-        placeholder="Contoh: 081234567890"
-        value={form.phone}
-        error={visibleErrors.phone}
-        onChange={(event) => handleChange("phone", event.target.value)}
+        id="occupation"
+        label="Pekerjaan"
+        placeholder="Contoh: Ibu Rumah Tangga"
+        value={form.occupation}
+        error={getVisibleError("occupation")}
+        onChange={(event) => handleChange("occupation", event.target.value)}
+        onBlur={() => markFieldAsTouched("occupation")}
       />
 
       <Input
-        id="address"
-        label="Alamat"
-        placeholder="Masukkan alamat pasien"
-        value={form.address}
-        error={visibleErrors.address}
-        onChange={(event) => handleChange("address", event.target.value)}
+        id="race"
+        label="Ras"
+        placeholder="Contoh: Sunda"
+        value={form.race}
+        error={getVisibleError("race")}
+        onChange={(event) => handleChange("race", event.target.value)}
+        onBlur={() => markFieldAsTouched("race")}
       />
 
-      <div className="flex justify-end gap-2 pt-2">
-        <Button type="button" variant="outline" onClick={onCancel}>
+      <div className="flex flex-col-reverse gap-2 pt-2 sm:flex-row sm:justify-end">
+        <Button
+          type="button"
+          variant="outline"
+          onClick={onCancel}
+          disabled={isSubmitting}
+        >
           Batal
         </Button>
 
