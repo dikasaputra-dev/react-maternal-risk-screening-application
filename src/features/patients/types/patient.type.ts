@@ -19,68 +19,27 @@ export type EducationLevel =
   | "doctorate"
   | "other";
 
+/**
+ * Type lama yang masih dipertahankan sementara untuk kompatibilitas
+ * file lama seperti risk-badge.tsx.
+ *
+ * Entity Patient baru sudah tidak menggunakan riskCategory.
+ */
 export type RiskCategory = "no_risk" | "low_risk" | "high_risk";
 
-/**
- * Entity pasien utama.
- *
- * Field demografi baru dibuat optional selama proses migrasi agar komponen
- * pasien lama tetap dapat dikompilasi. Setelah Patient Form pada Phase 2
- * selesai dimigrasikan, field demografi akan dijadikan required dan field
- * lama yang tidak lagi dibutuhkan dapat dihapus.
- */
 export type Patient = {
   id: string;
   fullName: string;
   dateOfBirth: string;
-
-  religion?: Religion;
-  education?: EducationLevel;
-  occupation?: string;
-  race?: string;
-
-  createdAt?: string;
-  updatedAt?: string;
-
-  /**
-   * Legacy compatibility fields.
-   *
-   * Masih dipertahankan sementara karena patient table, mock API,
-   * patient mapper, dan form lama masih menggunakannya.
-   */
-  nik: string;
-  age: number;
-  phone?: string;
-  address?: string;
-  lastScreeningDate: string;
-  riskCategory: RiskCategory;
+  religion: Religion;
+  education: EducationLevel;
+  occupation: string;
+  race: string;
+  createdAt: string;
+  updatedAt: string;
 };
 
-/**
- * Type form lama.
- *
- * Dipertahankan sementara supaya komponen PatientForm lama tidak rusak
- * sebelum dimigrasikan pada Phase 2.
- */
 export type PatientFormValues = {
-  nik: string;
-  fullName: string;
-  dateOfBirth: string;
-  phone?: string;
-  address?: string;
-};
-
-export type PatientFormErrors = Partial<
-  Record<keyof PatientFormValues, string>
->;
-
-/**
- * Kontrak form pasien untuk alur baru.
- *
- * Type ini akan menjadi PatientFormValues utama setelah seluruh form,
- * mock API, DTO, mapper, dan table selesai dimigrasikan pada Phase 2.
- */
-export type PatientRegistrationFormValues = {
   fullName: string;
   dateOfBirth: string;
   religion: Religion | "";
@@ -89,6 +48,14 @@ export type PatientRegistrationFormValues = {
   race: string;
 };
 
-export type PatientRegistrationFormErrors = Partial<
-  Record<keyof PatientRegistrationFormValues, string>
+export type PatientFormErrors = Partial<
+  Record<keyof PatientFormValues, string>
 >;
+
+/**
+ * Alias sementara agar file yang sebelumnya menggunakan nama
+ * PatientRegistrationFormValues tidak langsung rusak.
+ */
+export type PatientRegistrationFormValues = PatientFormValues;
+
+export type PatientRegistrationFormErrors = PatientFormErrors;
