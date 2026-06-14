@@ -63,12 +63,19 @@ export function PatientWorkflowLayout() {
 
   return (
     <div className="space-y-6">
-      <div>
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <Link
           to={patientRoutes.list}
           className="inline-flex items-center text-sm font-medium text-blue-600 hover:text-blue-700 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
         >
           ← Kembali ke Data Pasien
+        </Link>
+
+        <Link
+          to={patientRoutes.journey(patientId)}
+          className="inline-flex h-9 items-center justify-center rounded-xl border border-slate-300 bg-white px-3 text-sm font-medium text-slate-900 transition hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+        >
+          Ringkasan Perjalanan
         </Link>
       </div>
 

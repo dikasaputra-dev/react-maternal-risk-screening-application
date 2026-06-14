@@ -19,6 +19,10 @@ export const patientRoutes = {
     return `/patients/${encodeRouteParameter(patientId)}`;
   },
 
+  journey(patientId: string) {
+    return `/patients/${encodeRouteParameter(patientId)}`;
+  },
+
   initialScreening(patientId: string) {
     return [
       "/patients",
